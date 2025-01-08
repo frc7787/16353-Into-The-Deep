@@ -2,7 +2,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,26 +13,37 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
-public class AMainOpmode extends LinearOpMode {
+public class AMainOpmode extends OpMode {
 
     //private RevBlinkinLedDriver baseLights;
     //private boolean blinkinTimer = false;
-
+    private RevTouchSensor rotationLimitSwitch, extensionLimitSwitch;
    // private Servo wristServo, ClawServo;
     private DcMotor armLifter, armExtender;
    // private DigitalChannel armExtenderLimit;
     private DcMotor frontLeft, frontRight, backRight, backLeft;
+    private Servo clawServo, rotationServo;
+    private double CLAWOPENPOISITION = 0.23;
 
-    public void setup() {
+    private double CLAWCLOSEDPOISITION = 0.13;
+    private double CLAWDROPPOISITION = 0.0;
+    private double CLAWGRABPOISITION = 0.63;
+    public void init() {
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         frontRight = hardwareMap.dcMotor.get("frontRight");
         backRight = hardwareMap.dcMotor.get("backRight");
         backLeft = hardwareMap.dcMotor.get("backLeft");
+        rotationLimitSwitch = hardwareMap.get(RevTouchSensor.class,"rotationLimitSwitch");
+        extensionLimitSwitch = hardwareMap.get(RevTouchSensor.class,"extensionLimitSwitch");
+
+        clawServo = hardwareMap.get(Servo.class,"clawServo");
+        rotationServo = hardwareMap.get(Servo.class,"rotationServo");
 
         frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
 
         frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -38,52 +51,42 @@ public class AMainOpmode extends LinearOpMode {
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
         armLifter = hardwareMap.get(DcMotorEx.class, "armLifter");
         armLifter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        armLifter.setDirection(DcMotorSimple.Direction.REVERSE);
+        armLifter.setDirection(DcMotor.Direction.FORWARD);
 
         armExtender = hardwareMap.get(DcMotorEx.class, "armExtender");
         armExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        armExtender.setDirection(DcMotorSimple.Direction.REVERSE);
+        armExtender.setDirection(DcMotor.Direction.FORWARD);
         armExtender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armExtender.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armExtender.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLifter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLifter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-
-
-    @Override
-    public void runOpMode() {
-
-       // armExtenderLimit = hardwareMap.get(DigitalChannel.class, "armLimit");
-        //armExtenderLimit.setMode(DigitalChannel.Mode.INPUT);
-        //wristServo = hardwareMap.get(Servo.class, "AirPlane");
-       // ClawServo = hardwareMap.get(Servo.class, "ClawServo");
-       // baseLights = hardwareMap.get(RevBlinkinLedDriver.class, "baseLights");
-       // baseLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-
-        armExtender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armExtender.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        armLifter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLifter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armLifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        setup();
+    }
+
+
+    @Override
+    public void loop() {
+
+
+
+
         // Wait for the game to start (driver presses PLAY)
-        waitForStart();
 
         // run until the end of the match (driver presses STOP)
         double speed;
         double strafe;
         double turn;
         double Deadzone = 0.1;
-        double power = gamepad2.right_stick_y;
-        double extender = gamepad2.left_stick_y;
+       //     double power = gamepad2.right_stick_y;
+      //  double extender = gamepad2.left_stick_y;
+
         double downStop = -10;
 
-        while (opModeIsActive()) {
 
-            // If we pressed the left bumper, lift the arm.
+           /* // If we pressed the left bumper, lift the arm.
 
             if (Math.abs(gamepad2.right_stick_y) < Deadzone) {
                 power = 0;
@@ -95,16 +98,88 @@ public class AMainOpmode extends LinearOpMode {
                 armExtender.setPower(0);
             }else if(Math.abs(extender) > -Deadzone){
                 armExtender.setPower(0);
+            }*/
+          /*  if(homingLimit){
+                armExtender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                armLifter.setMode(DcMotor);
             }
-           /* if(gamepad2.dpad_up){
-                armExtender.setTargetPosition(1646);
-                armLifter.setTargetPosition(250);
+            */
+
+                if(rotationLimitSwitch.isPressed()){
+                    telemetry.addData("rot limit switch pressed", rotationLimitSwitch.isPressed());
+                }else{
+                    telemetry.addData("rot not pressed","not pressed");
+                }
+                if(extensionLimitSwitch.isPressed()){
+                    telemetry.addData("ext limit switch pressed", extensionLimitSwitch.isPressed());
+
+                }else{
+                    telemetry.addData("ext not pressed","ext not pressed");
+                }
+
+
+
+                if(gamepad2.dpad_up){
+                armExtender.setTargetPosition(-2000);
+                armLifter.setTargetPosition(4500);
                 armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                armLifter.setPower(0.8);
-                armExtender.setPower(0.8);
-            }
-//           */
+                armExtender.setPower(0.9);
+                armLifter.setPower(0.9);
+                } else if(gamepad2.dpad_right){
+                armExtender.setTargetPosition(-650);
+                armLifter.setTargetPosition(5940);
+                armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armExtender.setPower(0.9);
+                armLifter.setPower(0.9);
+                rotationServo.setPosition(CLAWGRABPOISITION);
+                } else if(gamepad2.dpad_down){
+                armExtender.setTargetPosition(-700);
+                armLifter.setTargetPosition(6885);
+                armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armExtender.setPower(0.9);
+                armLifter.setPower(0.9);
+                rotationServo.setPosition(CLAWGRABPOISITION);
+                } else if(gamepad2.triangle){
+                armExtender.setTargetPosition(-3700);
+                armLifter.setTargetPosition(3150);
+                armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armExtender.setPower(0.9);
+                armLifter.setPower(0.9);
+                rotationServo.setPosition(CLAWDROPPOISITION);
+                } else if(gamepad2.cross){
+                armExtender.setTargetPosition(-2029);
+                armLifter.setTargetPosition(4457);
+                armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armExtender.setPower(0.9);
+                armLifter.setPower(0.9);
+                } else if(gamepad2.right_trigger > 0.7){
+                clawServo.setPosition(CLAWOPENPOISITION);
+                } else if(gamepad2.right_trigger <= 0.7){
+                clawServo.setPosition(CLAWCLOSEDPOISITION);
+                } else if(gamepad2.dpad_left){
+                    /*
+                    armExtender.setTargetPosition(10);
+                    armLifter.setTargetPosition(10);
+                    armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rotationServo.setPosition(CLAWGRABPOISITION);
+                    armExtender.setPower(0.5);
+                    armLifter.setPower(0.5);
+                     */
+                    armExtender.setTargetPosition(-2029);
+                    armLifter.setTargetPosition(4457);
+                    armExtender.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armLifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armExtender.setPower(0.9);
+                    armLifter.setPower(0.9);
+                }
+
+//
 
             speed = -gamepad1.left_stick_y;
             strafe = gamepad1.left_stick_x;
@@ -118,17 +193,17 @@ public class AMainOpmode extends LinearOpMode {
             backRight.setPower(speed - turn + strafe);
 
 
-           armLifter.setPower(gamepad2.right_stick_y);
-           armExtender.setP(gamepad2.left_stick_y);
+          // armLifter.setPower(gamepad2.right_stick_y);
+          // armExtender.setPower(gamepad2.left_stick_y);
             telemetry.addData("Extension power",armExtender.getPower());
             telemetry.addData("extension mode",armExtender.getMode());
             telemetry.addData("extension target",armExtender.getTargetPosition());
-            telemetry.addData("extension target",armExtender.getCurrentPosition());
-
-            telemetry.addData("lifter power",armLifter.getCurrentPosition());
+            telemetry.addData("extension current",armExtender.getCurrentPosition());
+            telemetry.addData("lifter target",armLifter.getTargetPosition());
+            telemetry.addData("lifter current",armLifter.getCurrentPosition());
             telemetry.addData("lifter power",armLifter.getPower());
             telemetry.addData("extension mode",armLifter.getMode());
-            telemetry.addData("extension target",armLifter.getTargetPosition());
+            telemetry.addData("lifter target",armLifter.getTargetPosition());
             telemetry.update();
 
 /*
@@ -167,7 +242,7 @@ public class AMainOpmode extends LinearOpMode {
         }
     }
 
-}
+
 
 
     /*

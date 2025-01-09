@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class amainCode extends OpMode {
 
 
-    private DcMotor frontLeft, frontRight, backRight, backLeft;
+    private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor;
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
     private double EXTENSIONLEFTPICKUP = 0.6 ;
     private double EXTENSIONRIGHTPICKUP = 0.7 ;
@@ -35,6 +35,8 @@ public class amainCode extends OpMode {
         backRight = hardwareMap.dcMotor.get("backRight");
         backLeft = hardwareMap.dcMotor.get("backLeft");
 
+        clipMotor = hardwareMap.dcMotor.get("clipMotor");
+
 
 
         extentionRight = hardwareMap.get(Servo.class,"extentionRight");
@@ -48,8 +50,9 @@ public class amainCode extends OpMode {
         frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
-
+        clipMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        clipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        clipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -101,9 +104,8 @@ public class amainCode extends OpMode {
 
 
 
-           if(gamepad2.dpad_left){
-                clawServo.setPosition(ROTATIONTRANSFER);
-             } else if(gamepad2.dpad_right){
+
+               if(gamepad2.dpad_right){
                  rotationServo.setPosition(ROTATIONPICKUP);
             }else if (gamepad2.right_bumper){
                 clawServo.setPosition(CLAWPICKUP);
@@ -116,7 +118,10 @@ public class amainCode extends OpMode {
                extentionLeft.setPosition(EXTENSIONLEFTPICKUP);
                 extentionRight.setPosition(EXTENSIONRIGHTPICKUP);
              }
+        if (gamepad2.dpad_left){
 
+            rotationServo.setPosition(1);
+        }
 
             telemetry.update();
 

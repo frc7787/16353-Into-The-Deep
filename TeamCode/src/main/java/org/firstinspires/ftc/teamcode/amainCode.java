@@ -43,8 +43,8 @@ public class amainCode extends OpMode {
         extentionLeft = hardwareMap.get(Servo.class,"extentionLeft");
         clawServo = hardwareMap.get(Servo.class,"clawServo");
         rotationServo = hardwareMap.get(Servo.class,"rotationServo");
-        extentionLeft.setDirection( Servo.Direction.REVERSE);
-        extentionRight.setDirection(Servo.Direction.REVERSE);
+        //extentionLeft.setDirection( Servo.Direction.REVERSE);
+        //extentionRight.setDirection(Servo.Direction.REVERSE);
 
         frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -64,7 +64,12 @@ public class amainCode extends OpMode {
         telemetry.update();
 
     }
-
+    @Override
+    public void start() {
+        // initialise servo positions
+        extentionRight.setPosition(EXTENSIONRIGHTTRANSFER);
+        extentionLeft.setPosition(EXTENSIONLEFTTRANSFER);
+    }
 
     @Override
     public void loop() {

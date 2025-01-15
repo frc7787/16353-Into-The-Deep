@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,18 +12,20 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class amainCode extends OpMode {
 
-
-    private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor;
+    private RevTouchSensor limitSwitch;
+    private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
-    private double EXTENSIONLEFTPICKUP = 0.6 ;
-    private double EXTENSIONRIGHTPICKUP = 0.7 ;
 
     private double ROTATIONPICKUP = 0.35;
-    private double CLAWPICKUP = 0.5;
-    private double EXTENSIONLEFTTRANSFER = 0.7;
-    private double EXTENSIONRIGHTTRANSFER = 1;
-    private double CLAWOPEN = 1;
+    private double CLAWPICKUP = 0.18;
+   private int  EXTENTIONPICKUP = -128;
+    private int  EXTENTIONTRANSFER = 0;
+
+    private double CLAWOPEN = 0;
     private double ROTATIONTRANSFER = 1 ;
+
+    private boolean HOMING;
+
 
 
 
@@ -39,8 +42,7 @@ public class amainCode extends OpMode {
 
 
 
-        extentionRight = hardwareMap.get(Servo.class,"extentionRight");
-        extentionLeft = hardwareMap.get(Servo.class,"extentionLeft");
+
         clawServo = hardwareMap.get(Servo.class,"clawServo");
         rotationServo = hardwareMap.get(Servo.class,"rotationServo");
         //extentionLeft.setDirection( Servo.Direction.REVERSE);
@@ -59,6 +61,13 @@ public class amainCode extends OpMode {
         backRight.setDirection(DcMotorEx.Direction.FORWARD);
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
 
+        limitSwitch = hardwareMap.get(RevTouchSensor.class,"limitSwitch");
+        extentionMotor = hardwareMap.dcMotor.get("extentionMotor");
+        extentionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extentionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extentionMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        HOMING = true;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -67,12 +76,44 @@ public class amainCode extends OpMode {
     @Override
     public void start() {
         // initialise servo positions
-        extentionRight.setPosition(EXTENSIONRIGHTTRANSFER);
-        extentionLeft.setPosition(EXTENSIONLEFTTRANSFER);
+
     }
 
     @Override
     public void loop() {
+        if(HOMING){
+            extentionMotor.setPower(-0.5);
+            if(limitSwitch.isPressed()){
+                extentionMotor.setPower(0);
+                extentionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                extentionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                HOMING = false;
+            }
+        }else{
+            extentionMotor.setPower(-gamepad2.left_stick_y);
+            if (gamepad2.right_bumper){
+                clawServo.setPosition(CLAWPICKUP);
+            }else if (gamepad2.left_bumper){
+                clawServo.setPosition(CLAWOPEN);
+
+            }
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
         double drive = -gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
@@ -105,30 +146,7 @@ public class amainCode extends OpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-
-
-
-
-
-               if(gamepad2.dpad_right){
-                 rotationServo.setPosition(ROTATIONPICKUP);
-            }else if (gamepad2.right_bumper){
-                clawServo.setPosition(CLAWPICKUP);
-            }else if (gamepad2.left_bumper){
-                 clawServo.setPosition(CLAWOPEN);
-           }else if (gamepad2.dpad_down) {
-               extentionRight.setPosition(EXTENSIONRIGHTTRANSFER);
-                extentionLeft.setPosition(EXTENSIONLEFTTRANSFER);
-            }else if (gamepad2.dpad_up){
-               extentionLeft.setPosition(EXTENSIONLEFTPICKUP);
-                extentionRight.setPosition(EXTENSIONRIGHTPICKUP);
-             }
-        if (gamepad2.dpad_left){
-
-            rotationServo.setPosition(1);
-        }
-
-            telemetry.update();
+        telemetry.update();
 
 
     }
@@ -138,7 +156,6 @@ public class amainCode extends OpMode {
 
 
 /*
-
 
 
  */

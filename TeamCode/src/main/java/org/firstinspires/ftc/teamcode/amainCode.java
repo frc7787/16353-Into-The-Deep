@@ -22,8 +22,9 @@ public class amainCode extends OpMode {
     private int  EXTENTIONTRANSFER = 0;
 
     private double CLAWOPEN = 0;
-    private double ROTATIONTRANSFER = 1 ;
-
+    private double ROTATIONTRANSFER = 0 ;
+   // private  double NEUTRALCLAW = 0;
+    //private double NEUTRALROTATION = 1;
     private boolean HOMING;
 
 
@@ -92,12 +93,12 @@ public class amainCode extends OpMode {
             }
         }else{
             extentionMotor.setPower(-gamepad2.left_stick_y);
-            if (gamepad2.right_bumper){
+            if (gamepad2.dpad_right){
                 clawServo.setPosition(CLAWPICKUP);
-            }else if (gamepad2.left_bumper){
+            }else if (gamepad2.dpad_left){
                 clawServo.setPosition(CLAWOPEN);
 
-            }
+            }else if (gamepad2.dpad_up){}
 
 
 

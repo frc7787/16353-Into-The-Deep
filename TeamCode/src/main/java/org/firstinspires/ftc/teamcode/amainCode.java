@@ -168,6 +168,7 @@ public class amainCode extends OpMode {
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);
           if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
               clipMotor.setPower(0);
+              HOMINGCLIP = false;
           }
 
         // all the mecanum drive code

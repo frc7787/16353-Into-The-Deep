@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class amainCode extends OpMode {
 
-    private RevTouchSensor limitSwitch;
+    private RevTouchSensor limitSwitch, clipTouchSensor;
     private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
 
@@ -22,20 +22,21 @@ public class amainCode extends OpMode {
     private double ROTATIONTRANSFER = 0.95 ;
 
 
-    private double CLAWPICKUP = 0.18;
+    private double CLAWPICKUP = 0.19;
     private double CLAWOPEN = 0;
     private int  EXTENTIONPICKUP = -128;
     private int  EXTENTIONTRANSFER = 0;
 
-    private int CLIPMOTORBUCKET = 1000;
-    private int CLIPMOTORPREBUCKET = 900;
-    private int CLIPMOTORBAR = 500;
+    private int CLIPMOTORBUCKET = 3900;
+    private int CLIPMOTORPREBUCKET = 3300;
+    private int CLIPMOTORBAR = 1850;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.5;
 
    // private  double NEUTRALCLAW = 0;
     //private double NEUTRALROTATION = 1;
     private boolean HOMING;
+    private boolean HOMINGCLIP;
 
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.3;
@@ -70,6 +71,7 @@ public class amainCode extends OpMode {
         backRight.setDirection(DcMotorEx.Direction.FORWARD);
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
 
+        clipTouchSensor = hardwareMap.get(RevTouchSensor.class,"clipTouchSensor");
         limitSwitch = hardwareMap.get(RevTouchSensor.class,"limitSwitch");
         extentionMotor = hardwareMap.dcMotor.get("extentionMotor");
         extentionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -78,6 +80,7 @@ public class amainCode extends OpMode {
 
         HOMING = true;
 
+        HOMINGCLIP = false;
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -158,11 +161,14 @@ public class amainCode extends OpMode {
             clipMotor.setTargetPosition(CLIPMOTORHOME);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
+           HOMINGCLIP = true;
             telemetry.addData("Elevator going to","home");
         }
         int elevatorPosition = clipMotor.getCurrentPosition();
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);
-
+          if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
+              clipMotor.setPower(0);
+          }
 
         // all the mecanum drive code
         double drive = -gamepad1.left_stick_y;

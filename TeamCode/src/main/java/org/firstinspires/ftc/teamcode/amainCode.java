@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.round;
+
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +20,7 @@ public class amainCode extends OpMode {
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
 
     private double ROTATIONPICKUP = 0.22;
-    private double ROTATIONPREPICKUP = 0.3;
+    private double ROTATIONPREPICKUP = 0.33; // was 0.3, but hitting the sub bar
     private double ROTATIONNEUTRAL = 0.8;
     private double ROTATIONTRANSFER = 0.95 ;
 
@@ -32,6 +35,8 @@ public class amainCode extends OpMode {
     private int CLIPMOTORBAR = 1850;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.5;
+    private double CLIPMOTORPOWERUP = 0.8;
+    private int clipManualTarget = 0;
 
    // private  double NEUTRALCLAW = 0;
     //private double NEUTRALROTATION = 1;
@@ -145,12 +150,12 @@ public class amainCode extends OpMode {
         if (gamepad2.triangle) { // bucket
             clipMotor.setTargetPosition(CLIPMOTORBUCKET);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            clipMotor.setPower(CLIPMOTORPOWER);
+            clipMotor.setPower(CLIPMOTORPOWERUP);
             telemetry.addData("Elevator going to","bucket");
         } else if (gamepad2.square) { // prebucket
             clipMotor.setTargetPosition(CLIPMOTORPREBUCKET);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            clipMotor.setPower(CLIPMOTORPOWER);
+            clipMotor.setPower(CLIPMOTORPOWERUP);
             telemetry.addData("Elevator going to","prebucket");
         } else if (gamepad2.circle) { // bar
             clipMotor.setTargetPosition(CLIPMOTORBAR);
@@ -161,9 +166,21 @@ public class amainCode extends OpMode {
             clipMotor.setTargetPosition(CLIPMOTORHOME);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
-           HOMINGCLIP = true;
+            HOMINGCLIP = true;
             telemetry.addData("Elevator going to","home");
+        } else if (gamepad1.cross) { // clipping
+            clipMotor.setTargetPosition(CLIPMOTORBAR - 550);
+            clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            clipMotor.setPower(CLIPMOTORPOWER);
+            telemetry.addData("Elevator going to","clipped");
+        } else if (abs(gamepad2.right_stick_y)>0.05) {
+            clipManualTarget = clipMotor.getCurrentPosition() + round(gamepad2.right_stick_y*100);
+            clipMotor.setTargetPosition(clipManualTarget);
+            clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            clipMotor.setPower(CLIPMOTORPOWER);
+            telemetry.addData("Elevator MANUAL control. Target Position: ",clipManualTarget);
         }
+
         int elevatorPosition = clipMotor.getCurrentPosition();
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);
           if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
@@ -183,14 +200,14 @@ public class amainCode extends OpMode {
         double sin_theta = Math.sin(thetaRadians - Math.PI / 4.0);
         double cos_theta = Math.cos(thetaRadians - Math.PI / 4.0);
 
-        double max = Math.max(Math.abs(cos_theta), Math.abs(sin_theta));
+        double max = Math.max(abs(cos_theta), abs(sin_theta));
 
         double frontLeftPower  = power * cos_theta / max + turn;
         double frontRightPower = power * sin_theta / max - turn;
         double backLeftPower   = power * sin_theta / max + turn;
         double backRightPower  = power * cos_theta / max - turn;
 
-        double turnMagnitude = Math.abs(turn);
+        double turnMagnitude = abs(turn);
 
         if ((power + turnMagnitude) > 1.0) {
             frontLeftPower  /= power + turnMagnitude;

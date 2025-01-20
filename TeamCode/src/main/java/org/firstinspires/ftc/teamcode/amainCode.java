@@ -25,7 +25,7 @@ public class amainCode extends OpMode {
     private double ROTATIONTRANSFER = 0.95 ;
 
 
-    private double CLAWPICKUP = 0.19;
+    private double CLAWPICKUP = 0.32;
     private double CLAWOPEN = 0;
     private int  EXTENTIONPICKUP = -128;
     private int  EXTENTIONTRANSFER = 0;

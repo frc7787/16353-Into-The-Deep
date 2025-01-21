@@ -20,7 +20,7 @@ public class amainCode extends OpMode {
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
 
     private double ROTATIONPICKUP = 0.22;
-    private double ROTATIONPREPICKUP = 0.33; // was 0.3, but hitting the sub bar
+    private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
     private double ROTATIONNEUTRAL = 0.8;
     private double ROTATIONTRANSFER = 0.95 ;
 

@@ -7,7 +7,7 @@ import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
-public class MeepMeepTesting {
+public class MeepMeepStraightSpecimen {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
@@ -20,9 +20,29 @@ public class MeepMeepTesting {
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(7.5, -64, -Math.PI / 2))
 
                 .lineToY(-50)
-                .splineToConstantHeading(new Vector2d(0, -24), -Math.PI/2)
-                .splineTo(new Vector2d(20,-40),0)
-                                .splineTo(new Vector2d(42,-24),Math.PI/2)
+                        .setTangent(0)
+                .lineToX(4)
+                        .setTangent(-Math.PI/2)
+                .lineToY(-24)
+                        .setTangent(-Math.PI/2)
+                .lineToY(-30)
+                        .setTangent(0)
+                .lineToX(36)
+                        .setTangent(-Math.PI/2)
+                .lineToY(-12)
+                        .setTangent(0)
+                .lineToX(47)
+                // turn was here
+
+                        .setTangent(-Math.PI/2)
+                .lineToY(-60)
+                        .setTangent(-Math.PI/2)
+                .lineToY(-55)
+                // new position of turn
+                .turnTo(Math.PI/2)
+                        .setTangent(Math.PI/2)
+                .lineToY(-65.5)
+
 
 
                 //.setTangent(-Math.PI/2)

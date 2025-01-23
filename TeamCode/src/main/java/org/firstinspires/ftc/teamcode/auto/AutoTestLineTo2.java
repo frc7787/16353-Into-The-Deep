@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -10,8 +12,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 
 @Autonomous
 public class AutoTestLineTo2 extends LinearOpMode {
@@ -19,6 +24,8 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
     private double ROTATIONNEUTRAL = 0.8;
     private Servo rotationServo;
+
+
 
 
     @Override public void runOpMode() {
@@ -33,14 +40,21 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
+        ElevatorAction elevator = new ElevatorAction(hardwareMap);
+
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
+                //.afterTime(0, elevator.ClippingPosition())
                 .lineToY(-50)   // north a bit
                 .setTangent(0)
                 .lineToX(4)     // west a bit, more into the center of sub
                 .setTangent(-Math.PI/2)
-                .lineToY(-23)   // north to the sub
+                .lineToY(-23);   // north to the sub
+
+        TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
+
                 // new trajectory should start here
-                .waitSeconds(2)     // placeholder for action: CLIP
+                .waitSeconds(3)     // placeholder for action: CLIP
+                //.afterTime(2, elevator.ClipIt())
                 .setTangent(-Math.PI/2)
                 .lineToY(-30)   // south to a midpoint
                 .setTangent(0)
@@ -48,7 +62,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .setTangent(-Math.PI/2)
                 .lineToY(-6)    // north past the left hand spike mark
                 .setTangent(0)
-                .lineToX(47)    // east to line up with left hand spike mark
+                .lineToX(45)    // east to line up with left hand spike mark
                 // turn was here
 
                 .setTangent(-Math.PI/2)
@@ -66,7 +80,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
         // west towards sub, north to sub, action: clipping, reverse to park if possible
 
 
-        TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
+        TrajectoryActionBuilder extraBuilder = firstBuilder.endTrajectory().fresh()
                 .waitSeconds(5)
                 .lineToY(-48)
                 .waitSeconds(3)
@@ -87,7 +101,20 @@ public class AutoTestLineTo2 extends LinearOpMode {
         elapsedTime.reset();
 
 
-        Actions.runBlocking(first);
+        Actions.runBlocking(
+                new SequentialAction(
+                        new ParallelAction(
+                                first, elevator.ClippingPosition()
+                        ),
+                        elevator.ClipIt(),
+
+                        new ParallelAction(
+                                second,elevator.ClipHome()
+                        )
+
+
+                        ) // end of Sequential Action
+        );
         //Actions.runBlocking(second);
 
         //Actions.runBlocking(barToObservationZone);

@@ -167,7 +167,11 @@ public class amainCode extends OpMode {
             else {
                 telemetry.addData("Extension Power:", extensionPower);
                 telemetry.addData("Extension Position:", extensionPosition);
-                extentionMotor.setPower(extensionPower);
+                if ((extensionPosition > (EXTENSIONMAX - 200)) || (extensionPosition < 200)) {
+                    extentionMotor.setPower(extensionPower*0.5);
+                } else{
+                    extentionMotor.setPower(extensionPower);
+                }
             }
 
             // bumpers for sample PICKUP

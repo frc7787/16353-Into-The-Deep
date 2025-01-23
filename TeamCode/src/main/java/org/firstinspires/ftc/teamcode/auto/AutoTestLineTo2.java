@@ -43,7 +43,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
         ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                //.afterTime(0, elevator.ClippingPosition())
+                // start position to sub for clipping
                 .lineToY(-50)   // north a bit
                 .setTangent(0)
                 .lineToX(4)     // west a bit, more into the center of sub
@@ -51,8 +51,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .lineToY(-23);   // north to the sub
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
-
-                // new trajectory should start here
+                // sub to behind the left hand spike mark
                 .waitSeconds(3)     // placeholder for action: CLIP
                 //.afterTime(2, elevator.ClipIt())
                 .setTangent(-Math.PI/2)
@@ -62,8 +61,11 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .setTangent(-Math.PI/2)
                 .lineToY(-6)    // north past the left hand spike mark
                 .setTangent(0)
-                .lineToX(45)    // east to line up with left hand spike mark
-                // turn was here
+                .lineToX(45);    // east to line up with left hand spike mark
+
+        TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
+                // parallel with clipHome, push in left hand spike mark, backup
+                // turn around, move in for specimen pickup after a small wait
 
                 .setTangent(-Math.PI/2)
                 .lineToY(-60)   // south to push sample into zone
@@ -74,7 +76,12 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .setTangent(Math.PI/2)
                 .lineToY(-62)   // south to intermediate point, human player lines up specimen
                 .setTangent(Math.PI/2)
+                .waitSeconds(2)
                 .lineToY(-71);  // south to pickup specimen
+
+        TrajectoryActionBuilder fifthBuilder = secondBuilder.endTrajectory().fresh()
+                // from pickup specimen to clipping
+                ;
         // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
         // north a bit, turn around again (tangents will now be NEGATIVE again)
         // west towards sub, north to sub, action: clipping, reverse to park if possible
@@ -89,6 +96,8 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
+        Action third = secondBuilder.build();
+
 
 
         while (!isStopRequested() && !opModeIsActive()) {
@@ -103,14 +112,22 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
+                        // to the sub then clipping
                         new ParallelAction(
                                 first, elevator.ClippingPosition()
                         ),
+
                         elevator.ClipIt(),
 
                         new ParallelAction(
-                                second,elevator.ClipHome()
-                        )
+                                second
+                        ),
+
+                        new ParallelAction(
+                                elevator.ClipHome(), third
+                        ),
+
+                        elevator.ClippingPosition()
 
 
                         ) // end of Sequential Action

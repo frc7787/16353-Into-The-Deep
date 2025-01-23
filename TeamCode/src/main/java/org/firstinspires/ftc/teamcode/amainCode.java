@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class amainCode extends OpMode {
 
-    private RevTouchSensor limitSwitch, clipTouchSensor;
+    private RevTouchSensor limitSwitch, clipTouchSensor,limitMaxExtention;
     private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
     private Servo rotationServo, clawServo,extentionLeft,extentionRight;
 
@@ -37,7 +37,8 @@ public class amainCode extends OpMode {
     //private double NEUTRALROTATION = 1;
     private boolean HOMING;
     private boolean HOMINGCLIP;
-
+    // EXTENTIONMAX IS ZERO BECAUSE HAVENT HAD TIME TO MEASURE
+    private double EXTENTIONMAX= 2415;
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.3;
 
@@ -70,7 +71,7 @@ public class amainCode extends OpMode {
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setDirection(DcMotorEx.Direction.FORWARD);
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
-
+        limitMaxExtention = hardwareMap.get(RevTouchSensor.class,"limitMaxExtention");
         clipTouchSensor = hardwareMap.get(RevTouchSensor.class,"clipTouchSensor");
         limitSwitch = hardwareMap.get(RevTouchSensor.class,"limitSwitch");
         extentionMotor = hardwareMap.dcMotor.get("extentionMotor");
@@ -102,21 +103,25 @@ public class amainCode extends OpMode {
 
                 HOMING = false;
             }
-        }else{  // NOT HOMING extention, so other stuff can happen
+        }
+        else{  // NOT HOMING extention, so other stuff can happen
             extensionPower = -gamepad2.left_stick_y;
             if (extensionPower > EXTENSIONPOWERMAX) { // extension power from stick too big
                 extensionPower = EXTENSIONPOWERMAX;
             } else if (extensionPower < -EXTENSIONPOWERMAX) { // extension power from stick too big negative
                 extensionPower = -EXTENSIONPOWERMAX;
             }
-            if ((extensionPower<0) && limitSwitch.isPressed()) { // extension ALL the way in, DON'T move further
+            if (((extensionPower<0) && limitSwitch.isPressed()) || extentionMotor.getCurrentPosition()<3) { // extension ALL the way in, DON'T move further
                 telemetry.addData("Illegal Retraction!",extensionPower);
                 extentionMotor.setPower(0);
-                // already homed, trying to retract, so no Power!
-            } else {
+              //  already homed, trying to retract, so no Power!
+            }else if(((extensionPower>0) && limitMaxExtention.isPressed()) || extentionMotor.getCurrentPosition()>EXTENTIONMAX){
+                extentionMotor.setPower(0);
+            }
+           /* else  {
                 telemetry.addData("Extension Power:", extensionPower);
                 extentionMotor.setPower(extensionPower);
-            }
+            }*/
 
             // bumpers for sample PICKUP
             if (gamepad2.right_bumper){

@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -52,7 +53,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 // sub to behind the left hand spike mark
-                .waitSeconds(3)     // placeholder for action: CLIP
+                //.waitSeconds(1)     // placeholder for action: CLIP
                 //.afterTime(2, elevator.ClipIt())
                 .setTangent(-Math.PI/2)
                 .lineToY(-30)   // south to a midpoint
@@ -74,13 +75,37 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 // new position of turn
                 .turn(Math.PI)      // spin around for gripper to face wall
                 .setTangent(Math.PI/2)
-                .lineToY(-62)   // south to intermediate point, human player lines up specimen
+                .lineToY(-65)   // south to intermediate point, human player lines up specimen (was -62)
                 .setTangent(Math.PI/2)
-                .waitSeconds(2)
-                .lineToY(-71);  // south to pickup specimen
+                //.waitSeconds(2)
+                .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
+                //.lineToY(-71);  // south to pickup specimen
 
-        TrajectoryActionBuilder fifthBuilder = secondBuilder.endTrajectory().fresh()
+
+        TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
                 // from pickup specimen to clipping
+                .lineToY(-55)
+                .setTangent(0)
+                .lineToX(1)
+
+                //.turnTo(-Math.PI/2)
+                .turnTo(-Math.PI/2,
+                        new TurnConstraints(2*Math.PI/3,-2*Math.PI/3,2*Math.PI/3))
+                .setTangent(-Math.PI/2)
+                .lineToY(-23);
+
+        TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
+                // from pickup specimen to clipping
+                .setTangent(-Math.PI/2)
+                .lineToY(-30) //-48
+                .setTangent(-Math.PI/6)  // 0
+                .lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
+                //.lineToX(48);  //48
+
+
+
+        TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
+                // extra one just in case you want to add something
                 ;
         // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
         // north a bit, turn around again (tangents will now be NEGATIVE again)
@@ -96,7 +121,9 @@ public class AutoTestLineTo2 extends LinearOpMode {
 
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
-        Action third = secondBuilder.build();
+        Action third = thirdBuilder.build();
+        Action fourth = fourthBuilder.build();
+        Action fifth = fifthBuilder.build();
 
 
 
@@ -116,18 +143,37 @@ public class AutoTestLineTo2 extends LinearOpMode {
                         new ParallelAction(
                                 first, elevator.ClippingPosition()
                         ),
-
+                        // clip it
                         elevator.ClipIt(),
 
+                        // in front of spike mark
                         new ParallelAction(
                                 second
                         ),
 
+                        // elevator to home, drive spike mark to wall, pickup specimen
                         new ParallelAction(
                                 elevator.ClipHome(), third
                         ),
 
-                        elevator.ClippingPosition()
+                        // pickup specimen from wall
+                        elevator.ClippingPosition(),
+
+                        // go to sub and clip
+                        new ParallelAction(
+                                fourth
+                        ),
+
+                        // clip second specimen
+                        elevator.ClipIt(),
+
+                        // clip it and backup and try to park
+                        new ParallelAction(
+                                elevator.ClipIt(),fifth
+                        ),
+
+                        // homing elevator
+                        elevator.ClipHome()
 
 
                         ) // end of Sequential Action

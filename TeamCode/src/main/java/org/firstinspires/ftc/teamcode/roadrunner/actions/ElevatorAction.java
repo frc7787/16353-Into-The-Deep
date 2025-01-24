@@ -32,7 +32,7 @@ public class ElevatorAction {
         timeOutSeconds = 2.0;
 
         elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     } // end of constructor ElevatorAction
 

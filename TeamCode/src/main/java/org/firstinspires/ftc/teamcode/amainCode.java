@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
 public class amainCode extends OpMode {
@@ -31,10 +32,12 @@ public class amainCode extends OpMode {
     private int  EXTENTIONTRANSFER = 0;
 
     private int EXTENSIONMAX =2350;
+    // january 23 2025 CLIPMOTORBUCKET was 3900
 
-    private int CLIPMOTORBUCKET = 3900;
-    private int CLIPMOTORPREBUCKET = 3300;
-    private int CLIPMOTORBAR = 1850;
+    private int CLIPMOTORBUCKET = 4219;
+    private int CLIPMOTORPREBUCKET = 3900;
+    //January 23 2025 CLIPMOTORBAR WAS 1850 CHANGED TO 1900
+    private int CLIPMOTORBAR = 1880;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.5;
     private double CLIPMOTORPOWERUP = 0.8;
@@ -46,12 +49,14 @@ public class amainCode extends OpMode {
     private boolean HOMINGINITCLIP;
     private boolean HOMINGINITEXTENSION;
     private boolean HOMINGCLIP;
+   private ElapsedTime elapsedTime;
 
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.95;
 
 
     public void init() {
+        elapsedTime = new ElapsedTime();
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         frontRight = hardwareMap.dcMotor.get("frontRight");
         backRight = hardwareMap.dcMotor.get("backRight");
@@ -102,7 +107,7 @@ public class amainCode extends OpMode {
     }
     @Override
     public void start() {
-        // initialise servo positions
+        elapsedTime.reset();
 
     }
 
@@ -134,7 +139,7 @@ public class amainCode extends OpMode {
                     telemetry.addData("HOMING CLIP: limit switch IS pressed", "HOMING INIT CLIP false");
                 }
             } // end of IF HOMING EXTENSION
-            HOMING = HOMINGINITEXTENSION || HOMINGINITCLIP;
+            HOMING = (HOMINGINITEXTENSION || HOMINGINITCLIP) && (elapsedTime.seconds()<3);
         } else {  // NOT HOMING extention, so other stuff can happen
             extensionPower = -gamepad2.left_stick_y;
             if (extensionPower > EXTENSIONPOWERMAX) { // extension power from stick too big
@@ -225,7 +230,7 @@ public class amainCode extends OpMode {
             clipMotor.setPower(CLIPMOTORPOWER);
             telemetry.addData("Elevator going to","clipped");
         } else if (abs(gamepad2.right_stick_y)>0.05) {
-            clipManualTarget = clipMotor.getCurrentPosition() + round(gamepad2.right_stick_y*100);
+            clipManualTarget = clipMotor.getCurrentPosition() - round(gamepad2.right_stick_y*100);
             clipMotor.setTargetPosition(clipManualTarget);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);

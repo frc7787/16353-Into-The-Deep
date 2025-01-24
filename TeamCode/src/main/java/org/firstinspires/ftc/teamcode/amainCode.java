@@ -197,7 +197,7 @@ public class amainCode extends OpMode {
                 rotationServo.setPosition(ROTATIONNEUTRAL);
             }
             else if (gamepad2.dpad_right) { // transfer
-                rotationServo.setPosition(ROTATIONTRANSFER);
+                //rotationServo.setPosition(ROTATIONTRANSFER);
             }
 
         } // end of not HOMING for extention

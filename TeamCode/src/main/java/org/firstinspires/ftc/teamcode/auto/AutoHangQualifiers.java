@@ -10,7 +10,6 @@ import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -19,9 +18,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
-@Disabled
+
 @Autonomous
-public class AutoTestLineTo2 extends LinearOpMode {
+public class AutoHangQualifiers extends LinearOpMode {
     private final Pose2d initialPose = new Pose2d(7.5, -55, -Math.PI / 2);
 
     private double ROTATIONNEUTRAL = 0.8;
@@ -80,7 +79,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .setTangent(Math.PI/2)
                 //.waitSeconds(2)
                 .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
-                //.lineToY(-71);  // south to pickup specimen
+        //.lineToY(-71);  // south to pickup specimen
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
@@ -101,7 +100,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
                 .lineToY(-30) //-48
                 .setTangent(-Math.PI/6)  // 0
                 .lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
-                //.lineToX(48);  //48
+        //.lineToX(48);  //48
 
 
 
@@ -177,7 +176,7 @@ public class AutoTestLineTo2 extends LinearOpMode {
                         elevator.ClipHome()
 
 
-                        ) // end of Sequential Action
+                ) // end of Sequential Action
         );
         //Actions.runBlocking(second);
 
@@ -200,4 +199,5 @@ public class AutoTestLineTo2 extends LinearOpMode {
         //Actions.runBlocking(bookItToObservationZone);
     }
 }
+
 

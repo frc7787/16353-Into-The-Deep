@@ -7,11 +7,12 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-
+@Disabled
 @Autonomous
 public class AutoTestParameters extends LinearOpMode {
     private final Pose2d initialPose = new Pose2d(8, -58, Math.PI / 2);

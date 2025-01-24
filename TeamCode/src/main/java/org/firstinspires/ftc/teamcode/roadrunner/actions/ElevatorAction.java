@@ -15,8 +15,10 @@ public class ElevatorAction {
     public DcMotor elevatorMotor;
     private int CLIPMOTORBAR = 1850;
     private int CLIPPING = CLIPMOTORBAR - 600;
+    private int CLIPMOTORPARK = 1600;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.5;
+
     private ElapsedTime elapsedTime;
     private double timeOutSeconds;
 
@@ -150,5 +152,45 @@ public class ElevatorAction {
 
     public Action ClipHome() {
         return new clipHome();
+    }
+
+    public class clipPark implements Action {
+        private boolean initialized = false;
+        private boolean stillClippingPosition = true;
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                elapsedTime.reset();
+                elevatorMotor.setTargetPosition(CLIPMOTORPARK);
+                elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                elevatorMotor.setPower(CLIPMOTORPOWER);
+
+                packet.put("Elevator bar parking","to the bottom");
+                initialized = true;
+            } // end of not initialized
+            else {
+                int elevatorPosition = elevatorMotor.getCurrentPosition();
+                //boolean isFinished = (elevatorPosition < (CLIPMOTORHOME + 10) && (elevatorPosition > (CLIPMOTORHOME)))
+                boolean isFinished = (elevatorPosition < (CLIPMOTORPARK + 10))
+                        || (elapsedTime.seconds() > timeOutSeconds);
+                packet.put("Elevator Position",elevatorPosition);
+                if (isFinished) {
+                    elevatorMotor.setPower(0);
+                    //elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    //elevatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    stillClippingPosition = false;
+                    packet.put("Finished clip park less than 10",(elevatorPosition < (CLIPMOTORPARK + 10)));
+                    packet.put("Finished clip park elevatorposition",elevatorPosition);
+                }
+            } // end of else already initialized
+            packet.put("clipPark",initialized);
+            return stillClippingPosition;
+        } // end of run method for clipHome Action
+    } // end of clipPark Action
+
+    public Action ClipPark() {
+        return new clipPark();
     }
 } // end of elevatorAction

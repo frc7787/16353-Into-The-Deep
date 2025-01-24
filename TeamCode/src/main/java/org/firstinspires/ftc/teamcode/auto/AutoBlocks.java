@@ -45,6 +45,7 @@ public class AutoBlocks extends LinearOpMode {
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
                 // start position to sub for clipping
+                .waitSeconds(5)
                 .lineToY(-50)   // north a bit
                 .setTangent(0)
                 .lineToX(-4)     // west a bit, more into the center of sub
@@ -76,7 +77,9 @@ public class AutoBlocks extends LinearOpMode {
                 .setTangent(0)
                 .lineToX(-63)   // west to line up with left hand spike mark
                 .setTangent(-Math.PI/2)
-                .lineToY(-50);  // south to push block
+                .lineToY(-50)  // south to push block
+                .lineToY(-45)   // go to intermediate point for launching into spline
+                .splineToLinearHeading(new Pose2d(-22,-10,0),0);    // spline to sub for parking
 
         // east to line up with left hand spike mark
 
@@ -169,7 +172,7 @@ public class AutoBlocks extends LinearOpMode {
                         ),
 
                         // homing elevator
-                        elevator.ClipHome()
+                        elevator.ClipPark()
 
                 ) // end of Sequential Action
         );

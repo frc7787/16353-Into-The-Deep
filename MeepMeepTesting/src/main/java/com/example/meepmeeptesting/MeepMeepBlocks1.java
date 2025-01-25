@@ -41,7 +41,12 @@ public class MeepMeepBlocks1 {
                 //.splineToConstantHeading(new Vector2d(-20,-10),Math.PI/2)
                 //.splineTo(new Vector2d(-20,-10), Math.PI)
                 .lineToY(-45)
-                .splineToLinearHeading(new Pose2d(-22, -10, 0), 0)
+                //.splineToLinearHeading(new Pose2d(-22, -10, 0), 0)
+                .setTangent(-Math.PI/2)
+                .lineToY(-10)
+                .turnTo(0)
+                .setTangent(0)
+                .lineToX(-22)
                 .build());
 
 

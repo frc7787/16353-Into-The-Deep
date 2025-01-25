@@ -15,7 +15,7 @@ public class ElevatorAction {
     public DcMotor elevatorMotor;
     private int CLIPMOTORBAR = 1850;
     private int CLIPPING = CLIPMOTORBAR - 600;
-    private int CLIPMOTORPARK = 1600;
+    private int CLIPMOTORPARK = 1175;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.5;
 
@@ -173,7 +173,7 @@ public class ElevatorAction {
             else {
                 int elevatorPosition = elevatorMotor.getCurrentPosition();
                 //boolean isFinished = (elevatorPosition < (CLIPMOTORHOME + 10) && (elevatorPosition > (CLIPMOTORHOME)))
-                boolean isFinished = (elevatorPosition < (CLIPMOTORPARK + 10))
+                boolean isFinished = (elevatorPosition < (CLIPMOTORPARK + 5))
                         || (elapsedTime.seconds() > timeOutSeconds);
                 packet.put("Elevator Position",elevatorPosition);
                 if (isFinished) {

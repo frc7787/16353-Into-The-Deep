@@ -60,7 +60,7 @@ public class AutoHangQualifiers extends LinearOpMode {
                 .setTangent(0)
                 .lineToX(36)    // east towards the spike marks
                 .setTangent(-Math.PI/2)
-                .lineToY(-6)    // north past the left hand spike mark
+                .lineToY(-5)    // north past the left hand spike mark (changed from -6)
                 .setTangent(0)
                 .lineToX(45);    // east to line up with left hand spike mark
 
@@ -76,8 +76,8 @@ public class AutoHangQualifiers extends LinearOpMode {
                 .turn(Math.PI)      // spin around for gripper to face wall
                 .setTangent(Math.PI/2)
                 .lineToY(-65)   // south to intermediate point, human player lines up specimen (was -62)
+                .waitSeconds(3)
                 .setTangent(Math.PI/2)
-                //.waitSeconds(2)
                 .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
         //.lineToY(-71);  // south to pickup specimen
 
@@ -86,7 +86,7 @@ public class AutoHangQualifiers extends LinearOpMode {
                 // from pickup specimen to clipping
                 .lineToY(-55)
                 .setTangent(0)
-                .lineToX(1)
+                .lineToX(-1)
 
                 //.turnTo(-Math.PI/2)
                 .turnTo(-Math.PI/2,
@@ -99,7 +99,8 @@ public class AutoHangQualifiers extends LinearOpMode {
                 .setTangent(-Math.PI/2)
                 .lineToY(-30) //-48
                 .setTangent(-Math.PI/6)  // 0
-                .lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
+                //.lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
+                .lineToXLinearHeading(48,-Math.PI/6, null, new ProfileAccelConstraint(-70.0,-70.0));
         //.lineToX(48);  //48
 
 

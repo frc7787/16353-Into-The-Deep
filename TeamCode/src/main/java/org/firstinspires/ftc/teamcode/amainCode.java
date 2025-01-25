@@ -237,12 +237,16 @@ public class amainCode extends OpMode {
             telemetry.addData("Elevator MANUAL control. Target Position: ",clipManualTarget);
             HOMINGCLIP = true; // a bit of a hack; if using manual, and the elevator reaches the bottom and
             // presses the limit switch, we want the clipmotor turned OFF
+        } else if (gamepad1.dpad_up && gamepad1.triangle) {
+            HOMING = true;
+            HOMINGINITCLIP = true;
         }
 
         int elevatorPosition = clipMotor.getCurrentPosition();
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);
           if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
               clipMotor.setPower(0);
+              clipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
               HOMINGCLIP = false;
           }
 

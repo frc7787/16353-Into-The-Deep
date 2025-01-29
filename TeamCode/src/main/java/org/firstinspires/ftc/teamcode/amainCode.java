@@ -238,8 +238,9 @@ public class amainCode extends OpMode {
             HOMINGCLIP = true; // a bit of a hack; if using manual, and the elevator reaches the bottom and
             // presses the limit switch, we want the clipmotor turned OFF
         } else if (gamepad1.dpad_up && gamepad1.triangle) {
-            HOMING = true;
-            HOMINGINITCLIP = true;
+            //HOMING = true;
+            //HOMINGINITCLIP = true;
+            //elapsedTime.reset();
         }
 
         int elevatorPosition = clipMotor.getCurrentPosition();

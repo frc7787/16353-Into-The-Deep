@@ -76,7 +76,7 @@ public class AutoHangQualifiers extends LinearOpMode {
                 .turn(Math.PI)      // spin around for gripper to face wall
                 .setTangent(Math.PI/2)
                 .lineToY(-65)   // south to intermediate point, human player lines up specimen (was -62)
-                .waitSeconds(3)
+                .waitSeconds(2)
                 .setTangent(Math.PI/2)
                 .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
         //.lineToY(-71);  // south to pickup specimen
@@ -100,7 +100,7 @@ public class AutoHangQualifiers extends LinearOpMode {
                 .lineToY(-30) //-48
                 .setTangent(-Math.PI/6)  // 0
                 //.lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
-                .lineToXLinearHeading(48,-Math.PI/6, null, new ProfileAccelConstraint(-70.0,-70.0));
+                .lineToXLinearHeading(48,-Math.PI/6, null, new ProfileAccelConstraint(-70.0,70.0));
         //.lineToX(48);  //48
 
 

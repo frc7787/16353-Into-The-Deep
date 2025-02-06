@@ -13,10 +13,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-@Disabled
+
 @Autonomous
 public class AutoTestSplineTo1 extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(7.5, -55, -Math.PI / 2);
+    private final Pose2d initialPose = new Pose2d(7.5, -61, -Math.PI / 2);
 
     private double ROTATIONNEUTRAL = 0.8;
     private Servo rotationServo;
@@ -35,14 +35,32 @@ public class AutoTestSplineTo1 extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                .lineToY(-50)
-                .splineToConstantHeading(new Vector2d(0, -24), -Math.PI/2)
+                //.lineToY(-50)
+                .splineToConstantHeading(new Vector2d(0, -31), -Math.PI/2)
                 .waitSeconds(2)
                 .splineTo(new Vector2d(20,-40),0)
-                .waitSeconds(2)
-                .splineTo(new Vector2d(42,-24),Math.PI/2);
-                //.setTangent(-Math.PI/2)
-                //.lineToY(-48)
+                //.waitSeconds(10)
+                .splineTo(new Vector2d(35,-24),Math.PI/2)
+                .splineToConstantHeading(new Vector2d(48,-12),Math.PI/2)
+                .setTangent(-Math.PI/2)
+                .lineToY(-57)   // south to push sample into zone
+                .setTangent(-Math.PI/2)
+                .lineToY(-50)   // north, backup out of zone
+                // new position of turn
+                //.turn(Math.PI)      // spin around for gripper to face wall
+                .waitSeconds(1)
+                .setTangent(Math.PI/2)
+                .lineToY(-60)   // south to intermediate point, human player lines up specimen (was -62)
+                .waitSeconds(1)
+                .setTangent(Math.PI/2)
+                .lineToY(-64,null,new ProfileAccelConstraint(-70.0,70.0))
+                .setTangent(0)
+                //.splineToConstantHeading(new Vector2d(24, -48),Math.PI);
+                .splineToLinearHeading(new Pose2d(0,-48,Math.PI),0)
+                .turnTo(-Math.PI/2)
+                .setTangent(-Math.PI/2)
+                .lineToY(-31);
+                //.splineTo(new Vector2d(0,-31),Math.PI/2);
                 //.waitSeconds(3)
                 //.setTangent(0)
                 //.lineToX(48)
@@ -52,7 +70,8 @@ public class AutoTestSplineTo1 extends LinearOpMode {
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 .waitSeconds(5)
-                .lineToY(-48)
+                .setTangent(0)
+                //.lineToY(-48)
                 .waitSeconds(3)
                 .setTangent(0)
                 .lineToX(0);

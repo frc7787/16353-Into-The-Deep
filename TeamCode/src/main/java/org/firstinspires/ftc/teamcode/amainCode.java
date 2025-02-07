@@ -205,12 +205,16 @@ public class amainCode extends OpMode {
             }
             else if (gamepad2.dpad_down) {  // pre-pickup
                 rotationServo.setPosition(ROTATIONPRE);
+
             }
             else if (gamepad2.dpad_left) {  // neutral
                 rotationServo.setPosition(ROTATIONNEUTRAL);
+                twistServo.setPosition(TWISTPICKUP);
             }
             else if (gamepad2.dpad_right) { // transfer
-                //rotationServo.setPosition(ROTATIONTRANSFER);
+                bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+                rotationServo.setPosition(ROTATIONTRANSFER);
+                twistServo.setPosition(TWISTTRANSFER);
             }
 
         } // end of not HOMING for extention

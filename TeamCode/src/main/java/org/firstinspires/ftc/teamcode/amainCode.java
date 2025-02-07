@@ -18,24 +18,35 @@ public class amainCode extends OpMode {
 
     private RevTouchSensor limitSwitch, clipTouchSensor, limitMaxExtension;
     private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
-    private Servo rotationServo, clawServo,extentionLeft,extentionRight;
+    private Servo rotationServo, clawServo,twistServo, bucketServo;
+   //old servos not in use anymore extentionLeft,extentionRight
+   private double BUCKETHOME = 0.8;
+    private double BUCKETIN = 0.2;
+    private double ROTATIONPICKUP = 0.85;
+    private double CLAWPICKUP = 0.46;
+    private double ROTATIONNEUTRAL = 0.56;
 
-    private double ROTATIONPICKUP = 0.22;
-    private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
-    private double ROTATIONNEUTRAL = 0.8;
-    private double ROTATIONTRANSFER = 0.95 ;
+    private double CLAWOPEN = 0.22;
+    private double ROTATIONTRANSFER = 0.5;
+    private double ROTATIONPRE = 0.81;
+    private double TWISTTRANSFER= 0.47;
+    private double TWISTPICKUP= 1;
+   // private double ROTATIONPICKUP = 0.22;
+   // private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
+   // private double ROTATIONNEUTRAL = 0.8;
+   // private double ROTATIONTRANSFER = 0.95 ;
 
 
-    private double CLAWPICKUP = 0.32;
-    private double CLAWOPEN = 0;
+    //private double CLAWPICKUP = 0.32;
+  //  private double CLAWOPEN = 0;
     private int  EXTENTIONPICKUP = -128;
     private int  EXTENTIONTRANSFER = 0;
 
     private int EXTENSIONMAX =2350;
     // january 23 2025 CLIPMOTORBUCKET was 3900
 
-    private int CLIPMOTORBUCKET = 4219;
-    private int CLIPMOTORPREBUCKET = 3900;
+   // private int CLIPMOTORBUCKET = 4219;
+    private int CLIPMOTORPREBUCKET = 3054;
     //January 23 2025 CLIPMOTORBAR WAS 1850 CHANGED TO 1900
     private int CLIPMOTORBAR = 1880;
     private int CLIPMOTORHOME = 0;
@@ -66,10 +77,12 @@ public class amainCode extends OpMode {
         clipMotor.setDirection(DcMotor.Direction.REVERSE);
 
         clawServo = hardwareMap.get(Servo.class,"clawServo");
-        //clawServo.setDirection(Servo.Direction.REVERSE);
         rotationServo = hardwareMap.get(Servo.class,"rotationServo");
-        //extentionLeft.setDirection( Servo.Direction.REVERSE);
-        //extentionRight.setDirection(Servo.Direction.REVERSE);
+        bucketServo = hardwareMap.get(Servo.class,"bucketServo");
+        twistServo = hardwareMap.get(Servo.class,"twistServo");
+
+
+
 
         frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -191,7 +204,7 @@ public class amainCode extends OpMode {
                 rotationServo.setPosition(ROTATIONPICKUP);
             }
             else if (gamepad2.dpad_down) {  // pre-pickup
-                rotationServo.setPosition(ROTATIONPREPICKUP);
+                rotationServo.setPosition(ROTATIONPRE);
             }
             else if (gamepad2.dpad_left) {  // neutral
                 rotationServo.setPosition(ROTATIONNEUTRAL);
@@ -204,21 +217,19 @@ public class amainCode extends OpMode {
 
         // right hand geometric buttons for clip elevator
         if (gamepad2.triangle) { // bucket
-            clipMotor.setTargetPosition(CLIPMOTORBUCKET);
-            clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            clipMotor.setPower(CLIPMOTORPOWERUP);
-            telemetry.addData("Elevator going to","bucket");
-        } else if (gamepad2.square) { // prebucket
+
+        } else if (gamepad2.square) { // prebucket USED TO BE PREBUCKET NOW IT IS BUCKET
             clipMotor.setTargetPosition(CLIPMOTORPREBUCKET);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWERUP);
             telemetry.addData("Elevator going to","prebucket");
-        } else if (gamepad2.circle) { // bar
+        }/* else if (gamepad2.circle) { // bar
             clipMotor.setTargetPosition(CLIPMOTORBAR);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
+           bucketServo.setPosition(BUCKETIN);
             telemetry.addData("Elevator going to","bar");
-        } else if (gamepad2.cross) { // home
+        }*/ else if (gamepad2.cross) { // home
             clipMotor.setTargetPosition(CLIPMOTORHOME);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
@@ -229,7 +240,11 @@ public class amainCode extends OpMode {
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
             telemetry.addData("Elevator going to","clipped");
-        } else if (abs(gamepad2.right_stick_y)>0.05) {
+        }else if (gamepad2.left_trigger>0.9) {
+            bucketServo.setPosition(BUCKETIN);
+        }else if(gamepad2.right_trigger>0.9) {
+            bucketServo.setPosition(BUCKETHOME);
+        }else if (abs(gamepad2.right_stick_y)>0.05) {
             clipManualTarget = clipMotor.getCurrentPosition() - round(gamepad2.right_stick_y*100);
             clipMotor.setTargetPosition(clipManualTarget);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);

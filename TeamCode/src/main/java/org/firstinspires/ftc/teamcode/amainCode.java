@@ -202,9 +202,12 @@ public class amainCode extends OpMode {
             // dpad for claw ROTATION
             if (gamepad2.dpad_up) { // pickup
                 rotationServo.setPosition(ROTATIONPICKUP);
+                twistServo.setPosition(TWISTPICKUP);
+
             }
             else if (gamepad2.dpad_down) {  // pre-pickup
                 rotationServo.setPosition(ROTATIONPRE);
+                twistServo.setPosition(TWISTPICKUP);
 
             }
             else if (gamepad2.dpad_left) {  // neutral

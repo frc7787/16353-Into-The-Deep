@@ -230,13 +230,13 @@ public class amainCode extends OpMode {
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWERUP);
             telemetry.addData("Elevator going to","prebucket");
-        }/* else if (gamepad2.circle) { // bar
+        } else if (gamepad2.circle) { // bar
             clipMotor.setTargetPosition(CLIPMOTORBAR);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
            bucketServo.setPosition(BUCKETIN);
             telemetry.addData("Elevator going to","bar");
-        }*/ else if (gamepad2.cross) { // home
+        } else if (gamepad2.cross) { // home
             clipMotor.setTargetPosition(CLIPMOTORHOME);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);

@@ -214,7 +214,7 @@ public class amainCode extends OpMode {
                 rotationServo.setPosition(ROTATIONNEUTRAL);
                 twistServo.setPosition(TWISTPICKUP);
             }
-            else if (gamepad2.dpad_right) { // transfer
+            else if (gamepad2.dpad_right ) { // transfer
                 bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
                 rotationServo.setPosition(ROTATIONTRANSFER);
                 twistServo.setPosition(TWISTTRANSFER);
@@ -234,7 +234,7 @@ public class amainCode extends OpMode {
             clipMotor.setTargetPosition(CLIPMOTORBAR);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
-           bucketServo.setPosition(BUCKETIN);
+           
             telemetry.addData("Elevator going to","bar");
         } else if (gamepad2.cross) { // home
             clipMotor.setTargetPosition(CLIPMOTORHOME);

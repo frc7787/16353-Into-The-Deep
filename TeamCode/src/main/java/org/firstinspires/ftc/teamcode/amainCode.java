@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,8 +11,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 public class amainCode extends OpMode {
@@ -65,8 +69,21 @@ public class amainCode extends OpMode {
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.95;
 
+    private IMU imu;
+
+    private RevHubOrientationOnRobot controlHubOrientation = new RevHubOrientationOnRobot(
+            RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+    );
+    private IMU.Parameters imuParameters = new IMU.Parameters(controlHubOrientation);
+
+
 
     public void init() {
+
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(imuParameters);
+        imu.resetYaw();
+
         elapsedTime = new ElapsedTime();
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         frontRight = hardwareMap.dcMotor.get("frontRight");
@@ -279,6 +296,7 @@ public class amainCode extends OpMode {
         double turn = gamepad1.right_stick_x;
 
         double thetaRadians = Math.atan2(drive, strafe);
+        thetaRadians -= imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         double power = Math.hypot(strafe, drive);
 

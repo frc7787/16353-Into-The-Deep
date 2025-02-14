@@ -23,48 +23,48 @@ public class amainCode extends OpMode {
     private RevTouchSensor limitSwitch, clipTouchSensor, limitMaxExtension;
     private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
     private Servo rotationServo, clawServo,twistServo, bucketServo;
-   //old servos not in use anymore extentionLeft,extentionRight
-   private double BUCKETHOME = 0.8;
+    //old servos not in use anymore extentionLeft,extentionRight
+    private double BUCKETHOME = 0.8;
     private double BUCKETIN = 0.2;
-    private double ROTATIONPICKUP = 0.85;
+    private double ROTATIONPICKUP = 0.98;
     private double CLAWPICKUP = 0.46;
-    private double ROTATIONNEUTRAL = 0.56;
+    private double ROTATIONNEUTRAL = 0.7;
 
     private double CLAWOPEN = 0.22;
-    private double ROTATIONTRANSFER = 0.5;
-    private double ROTATIONPRE = 0.81;
+    private double ROTATIONTRANSFER = 0.65;
+    private double ROTATIONPRE = 0.9;
     private double TWISTTRANSFER= 0.47;
     private double TWISTPICKUP= 1;
-   // private double ROTATIONPICKUP = 0.22;
-   // private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
-   // private double ROTATIONNEUTRAL = 0.8;
-   // private double ROTATIONTRANSFER = 0.95 ;
+    // private double ROTATIONPICKUP = 0.22;
+    // private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
+    // private double ROTATIONNEUTRAL = 0.8;
+    // private double ROTATIONTRANSFER = 0.95 ;
 
 
     //private double CLAWPICKUP = 0.32;
-  //  private double CLAWOPEN = 0;
+    //  private double CLAWOPEN = 0;
     private int  EXTENTIONPICKUP = -128;
     private int  EXTENTIONTRANSFER = 0;
 
     private int EXTENSIONMAX =2350;
     // january 23 2025 CLIPMOTORBUCKET was 3900
 
-   // private int CLIPMOTORBUCKET = 4219;
+    // private int CLIPMOTORBUCKET = 4219;
     private int CLIPMOTORPREBUCKET = 3054;
     //January 23 2025 CLIPMOTORBAR WAS 1850 CHANGED TO 1900
     private int CLIPMOTORBAR = 1880;
     private int CLIPMOTORHOME = 0;
-    private double CLIPMOTORPOWER = 0.5;
+    private double CLIPMOTORPOWER = 1;
     private double CLIPMOTORPOWERUP = 0.8;
     private int clipManualTarget = 0;
 
-   // private  double NEUTRALCLAW = 0;
+    // private  double NEUTRALCLAW = 0;
     //private double NEUTRALROTATION = 1;
     private boolean HOMING;
     private boolean HOMINGINITCLIP;
     private boolean HOMINGINITEXTENSION;
     private boolean HOMINGCLIP;
-   private ElapsedTime elapsedTime;
+    private ElapsedTime elapsedTime;
 
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.95;
@@ -146,7 +146,7 @@ public class amainCode extends OpMode {
         if (HOMING) {
             rotationServo.setPosition(ROTATIONNEUTRAL);
             if (HOMINGINITEXTENSION) {
-            // homing the extention, so don't do other claw stuff
+                // homing the extention, so don't do other claw stuff
                 extentionMotor.setPower(-0.2);
                 telemetry.addData("HOMING: limit switch IN is NOT pressed.","HOMING INIT EXTENSION true");
                 if(limitSwitch.isPressed()){
@@ -156,7 +156,7 @@ public class amainCode extends OpMode {
 
                     HOMINGINITEXTENSION = false;
                     telemetry.addData("HOMING: limit switch IN is pressed", "HOMING INIT EXTENSION false");
-            } } // end of IF HOMINGINITEXTENSION
+                } } // end of IF HOMINGINITEXTENSION
             if (HOMINGINITCLIP) {
                 clipMotor.setPower(-0.2);
                 telemetry.addData("HOMING CLIP: limit switch is NOT pressed", "HOMING INIT CLIP true");
@@ -220,16 +220,22 @@ public class amainCode extends OpMode {
             if (gamepad2.dpad_up) { // pickup
                 rotationServo.setPosition(ROTATIONPICKUP);
                 twistServo.setPosition(TWISTPICKUP);
+                bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+
 
             }
             else if (gamepad2.dpad_down) {  // pre-pickup
                 rotationServo.setPosition(ROTATIONPRE);
                 twistServo.setPosition(TWISTPICKUP);
+                bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+
 
             }
             else if (gamepad2.dpad_left) {  // neutral
                 rotationServo.setPosition(ROTATIONNEUTRAL);
                 twistServo.setPosition(TWISTPICKUP);
+                bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+
             }
             else if (gamepad2.dpad_right ) { // transfer
                 bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
@@ -246,16 +252,21 @@ public class amainCode extends OpMode {
             clipMotor.setTargetPosition(CLIPMOTORPREBUCKET);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWERUP);
+            rotationServo.setPosition(ROTATIONNEUTRAL);
+            twistServo.setPosition(TWISTPICKUP);
             telemetry.addData("Elevator going to","prebucket");
         } else if (gamepad2.circle) { // bar
             clipMotor.setTargetPosition(CLIPMOTORBAR);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
-           
+            rotationServo.setPosition(ROTATIONNEUTRAL);
+            twistServo.setPosition(TWISTPICKUP);
+
             telemetry.addData("Elevator going to","bar");
         } else if (gamepad2.cross) { // home
             clipMotor.setTargetPosition(CLIPMOTORHOME);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            bucketServo.setPosition(BUCKETHOME);
             clipMotor.setPower(CLIPMOTORPOWER);
             HOMINGCLIP = true;
             telemetry.addData("Elevator going to","home");
@@ -284,16 +295,21 @@ public class amainCode extends OpMode {
 
         int elevatorPosition = clipMotor.getCurrentPosition();
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);
-          if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
-              clipMotor.setPower(0);
-              clipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-              HOMINGCLIP = false;
-          }
+        if (HOMINGCLIP && clipTouchSensor.isPressed() ) {
+            clipMotor.setPower(0);
+            clipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            HOMINGCLIP = false;
+        }
+
+        if (gamepad1.options) { imu.resetYaw(); }
 
         // all the mecanum drive code
         double drive = -gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
+       drive *= Math.abs(drive);
+        strafe *= Math.abs(strafe);
+        turn *= Math.abs(turn);
 
         double thetaRadians = Math.atan2(drive, strafe);
         thetaRadians -= imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);

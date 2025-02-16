@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -16,19 +15,21 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction2;
-import static org.firstinspires.ftc.teamcode.Constants.*;
+import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 
 @Autonomous
-public class AutoWallToHang extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(50.0, -64, Math.PI / 2);
+public class AutoSweepSpecimen2 extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(45.0, -64, -Math.PI / 2);
 
+    private double ROTATIONNEUTRAL = 0.56;
 
-    private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
+    private Servo rotationServo;
+
+    TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
+    ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
 
 
 
@@ -36,21 +37,8 @@ public class AutoWallToHang extends LinearOpMode {
     @Override public void runOpMode() {
 
         ElapsedTime elapsedTime = new ElapsedTime();
-        rotationServo = hardwareMap.get(Servo .class,ROTATION_SERVO_NAME);
-        hockeyStickServo = hardwareMap.get(Servo.class, HOCKEYSTICK_SERVO_NAME);
-        twistServo = hardwareMap.get(Servo.class, TWIST_SERVO_NAME);
-        clawServo = hardwareMap.get(Servo.class, CLAW_SERVO_NAME);
-        bucketServo = hardwareMap.get(Servo.class, BUCKET_SERVO_NAME);
-
-        rotationServo.setPosition(ROTATION_NEUTRAL);
-        hockeyStickServo.setPosition(HOCKEYSTICK_INITIAL);
-        twistServo.setPosition(TWIST_INITIAL);
-        clawServo.setPosition(CLAW_OPEN);
-        bucketServo.setPosition(BUCKET_HOME);
-
-        TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
-        ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
-
+        rotationServo = hardwareMap.get(Servo .class,"rotationServo");
+        rotationServo.setPosition(ROTATIONNEUTRAL);
 
         //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
         //.setPose(initialPose)
@@ -58,48 +46,51 @@ public class AutoWallToHang extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        ElevatorAction2 elevator = new ElevatorAction2(hardwareMap);
+        ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // start position of wall to sub and back
-                //.setTangent(Math.PI/2)
-                //.lineToY(-60, null, new ProfileAccelConstraint(-70.0, 70.0))
-                //.lineToY(-60, null, null)
-                //.strafeTo(new Vector2d(50,-60))
-                //.setTangent(Math.PI/2)
-                .splineToSplineHeading(new Pose2d(4, -31.0, -Math.PI /1.999), Math.PI / 2, null, null)
-                .waitSeconds(0.5);
-                // bar to wall pickup
+                // from wall at x=18 pre-loaded to sub
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(4,-24),Math.PI/2,fastVelocity,fastAcceleration)
+                .waitSeconds(1);
 
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
-                // sub to the wall
-                .setTangent(-Math.PI/2)
-                .splineToSplineHeading(new Pose2d(50, -58, Math.PI / 2), -Math.PI / 2, null,null)
-                .waitSeconds(1)
-                //.setTangent(Math.PI/2)
-                //.lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
-                .strafeTo(new Vector2d(50,-64), null, null);
+                // FIRST SPIKE MARK
+                // heading towards first spike marks, go midway
+                // need to extend hockey stick
+                .splineToLinearHeading(new Pose2d(24,-48,0),0)
+                // go towards lh spike mark
+                .splineToSplineHeading(new Pose2d(36,-36,Math.PI/4), Math.PI/4)
+                //.waitSeconds(0.5)
+                // sweep 1st block
+                .splineToSplineHeading(new Pose2d(48, -48, -Math.PI/4),-Math.PI/4);
 
 
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-                // from the wall, back to the sub
-                .setTangent(Math.PI / 2)
-                .splineToSplineHeading(new Pose2d(-0.5, -28.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
-                .waitSeconds(0.5);
+                // SECOND SPIKE MARK
+                // go towards middle spike mark
+                .splineToLinearHeading(new Pose2d(44, -36,Math.PI/3),Math.PI/3)
+                //.waitSeconds(2)
+                // sweep 2nd block
+                // execute a small turn, hopefully sweeping the block a bit
+                .splineToSplineHeading(new Pose2d(52,-34,0),-Math.PI/3)
+                //.waitSeconds(2)
+                // bring the block down into the observation zone
+                .splineToConstantHeading(new Vector2d(52,-56),-Math.PI/2);
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // from pickup specimen to clipping
-                .setTangent(-Math.PI/2)
-                .strafeTo(new Vector2d(40,-60));
+                // TIME TO GO TO WALL FOR CLIPPING
+                // retract hockey stick
+                // move to wall
+                .splineToSplineHeading(new Pose2d(48, -60, Math.PI / 2), -Math.PI / 2)
+                //.waitSeconds(1)
+                .setTangent(Math.PI/2)
+                .lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
 
-                //.turnTo(-Math.PI/2)
-                //.turnTo(-Math.PI/2,
-                        //new TurnConstraints(2*Math.PI/3,-2*Math.PI/3,2*Math.PI/3))
-                //.setTangent(-Math.PI/2)
-                //.lineToY(-23);
+
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // from pickup specimen to clipping
@@ -144,33 +135,22 @@ public class AutoWallToHang extends LinearOpMode {
         waitForStart();
         elapsedTime.reset();
 
+
         Actions.runBlocking(
                 new SequentialAction(
                         // to the sub then clipping
                         new ParallelAction(
-                                first,
-                                elevator.ClippingPosition()
+                                first, elevator.ClippingPosition()
                         ),
                         // clip it
-
                         elevator.ClipIt(),
 
-                        // back to the wall
+                        // get all the blocks on spike marks
                         new ParallelAction(
                                 elevator.ClipHome(), second
                         ),
-
-                        // back to the sub
-                        new ParallelAction(
-                                elevator.ClippingPosition(), third
-                        ),
-                        elevator.ClipIt(),
-
-                        // desperately try to park!
-                        fourth,
-                        elevator.ClipHome()
-
-
+                        third,
+                        fourth
 
 
                 ) // end of Sequential Action

@@ -23,8 +23,12 @@ import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 public class AutoHangQualifiers extends LinearOpMode {
     private final Pose2d initialPose = new Pose2d(7.5, -55, -Math.PI / 2);
 
-    private double ROTATIONNEUTRAL = 0.8;
-    private Servo rotationServo;
+    private double ROTATIONNEUTRAL = 0.56;
+
+    private double ROTATIONTRANSFER = 0.5;
+
+    private double TWISTTRANSFER= 0.47;
+    private Servo rotationServo, twistServo;
 
 
 
@@ -33,7 +37,8 @@ public class AutoHangQualifiers extends LinearOpMode {
 
         ElapsedTime elapsedTime = new ElapsedTime();
         rotationServo = hardwareMap.get(Servo .class,"rotationServo");
-        rotationServo.setPosition(ROTATIONNEUTRAL);
+        twistServo = hardwareMap.get(Servo.class,"twistServo");
+
 
         //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
         //.setPose(initialPose)
@@ -129,6 +134,8 @@ public class AutoHangQualifiers extends LinearOpMode {
 
 
         while (!isStopRequested() && !opModeIsActive()) {
+            rotationServo.setPosition(ROTATIONNEUTRAL);
+            twistServo.setPosition(TWISTTRANSFER);
             Pose2d position = drive.localizer.getPose();
             telemetry.addData("Position during Init", position);
             telemetry.update();

@@ -86,7 +86,7 @@ public class ElevatorAction {
                 boolean isFinished = (elevatorPosition > CLIPMOTOR_BAR - 10) || (elapsedTime.seconds() > timeOutSeconds);
                 packet.put("Elevator Position",elevatorPosition);
                 if (isFinished) {
-                    elevatorMotor.setPower(0);
+                    //elevatorMotor.setPower(0);
                     //elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     //elevatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     stillClippingPosition = false;
@@ -109,7 +109,7 @@ public class ElevatorAction {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            packet.put("Elevator clipping","TOP");
+            packet.put("Elevator clipIT","TOP");
             if (!initializedClipit) {
                 elapsedTime.reset();
                 elevatorMotor.setTargetPosition(CLIPPING);

@@ -83,22 +83,23 @@ public class AutoHang2plus1 extends LinearOpMode {
 
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-                // SECOND SPIKE MARK
+                // SECOND SPIKE MARK - push AND pickup plus 1
                 // heading back up to second spike mark
                 .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
                 .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
                 // almost there
                 .splineToConstantHeading(new Vector2d(56,-21),0)
                 // push block into zone
-                .splineToSplineHeading(new Pose2d(56,-50,Math.PI/2),-Math.PI/2)
+                .splineToSplineHeading(new Pose2d(56,-50,Math.PI/2),-7*Math.PI/8)
+
                 // ADD in the movement away from the wall to prepare for specimen pickup
-                .splineToLinearHeading(new Pose2d(50,-56,Math.PI/2),Math.PI/2)
-                .waitSeconds(1)
+                .splineToLinearHeading(new Pose2d(50,-62,Math.PI/2),Math.PI)
+                .waitSeconds(1.5)
                 .strafeTo(new Vector2d(50,-67));
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
                 // at the wall, picked up the plus 1 specimen, head to the bar to clip
-                .splineToSplineHeading(new Pose2d(4, -31.0, -Math.PI /1.999), Math.PI / 2, null, null)
+                .splineToSplineHeading(new Pose2d(6, -31.0, -Math.PI /1.999), Math.PI / 2, null, null)
                 .waitSeconds(0.5);
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
@@ -108,7 +109,18 @@ public class AutoHang2plus1 extends LinearOpMode {
                 .waitSeconds(1)
                 //.setTangent(Math.PI/2)
                 //.lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
-                .strafeTo(new Vector2d(50,-64), null, null);
+                .strafeTo(new Vector2d(50,-65.5), null, null);
+
+        TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
+                // from the wall, back to the sub
+                .setTangent(Math.PI / 2)
+                .splineToSplineHeading(new Pose2d(-0.5, -32.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
+                .waitSeconds(0.5);
+
+        TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
+                // try to PARK
+                .setTangent(-Math.PI/2)
+                .strafeTo(new Vector2d(40,-60));
 
         // bar to wall pickup
 
@@ -136,7 +148,7 @@ public class AutoHang2plus1 extends LinearOpMode {
 
 
 
-        TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
+        //TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
                 // extra one just in case you want to add something
                 ;
         // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
@@ -156,6 +168,8 @@ public class AutoHang2plus1 extends LinearOpMode {
         Action third = thirdBuilder.build();
         Action fourth = fourthBuilder.build();
         Action fifth = fifthBuilder.build();
+        Action sixth = sixthBuilder.build();
+        Action seventh = seventhBuilder.build();
 
 
 
@@ -186,13 +200,21 @@ public class AutoHang2plus1 extends LinearOpMode {
                         third,
                         // to the sub then clipping plus 1
                         new ParallelAction(
-                                fourth, elevator.ClippingPosition()
+                                elevator.ClippingPosition(), fourth
                         ),
                         // clip plus 1
                         elevator.ClipIt(),
                         new ParallelAction(
                                 elevator.ClipHome(),fifth
+                        ),
+                        new ParallelAction(
+                                elevator.ClippingPosition(),sixth
+                        ),
+                        elevator.ClipIt(),
+                        new ParallelAction(
+                                seventh, elevator.ClipHome()
                         )
+
                         // push fourth block
                         //fourth
 

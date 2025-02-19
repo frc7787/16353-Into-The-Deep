@@ -45,21 +45,24 @@ public class ElevatorAction {
 
     private RevTouchSensor clipTouchSensor;
 
-    private Servo rotationServo, clawServo,twistServo, bucketServo;
+    private Servo rotationServo, clawServo,twistServo, bucketServo, hockeystickServo;
+
+
 
 
     public ElevatorAction(HardwareMap hardwareMap){
         elevatorMotor = hardwareMap.get(DcMotor.class, "clipMotor");
         elevatorMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        clawServo = hardwareMap.get(Servo.class,"clawServo");
-        rotationServo = hardwareMap.get(Servo.class,"rotationServo");
-        bucketServo = hardwareMap.get(Servo.class,"bucketServo");
-        twistServo = hardwareMap.get(Servo.class,"twistServo");
+        clawServo = hardwareMap.get(Servo.class, CLAW_SERVO_NAME);
+        rotationServo = hardwareMap.get(Servo.class, ROTATION_SERVO_NAME);
+        bucketServo = hardwareMap.get(Servo.class, BUCKET_SERVO_NAME);
+        twistServo = hardwareMap.get(Servo.class, TWIST_SERVO_NAME);
+        hockeystickServo = hardwareMap.get(Servo.class, HOCKEYSTICK_SERVO_NAME);
 
         clipTouchSensor = hardwareMap.get(RevTouchSensor.class, "clipTouchSensor");
         elapsedTime = new ElapsedTime();
-        timeOutSeconds = 2.0;
+        timeOutSeconds = 4.0;
 
         elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -232,18 +235,18 @@ public class ElevatorAction {
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
                 elapsedTime.reset();
-                elevatorMotor.setTargetPosition(CLIPMOTORPREBUCKET);
+                elevatorMotor.setTargetPosition(CLIPMOTOR_PREBUCKET);
                 elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                elevatorMotor.setPower(CLIPMOTORPOWERDOWN);
+                elevatorMotor.setPower(CLIPMOTOR_POWERUP);
                 packet.put("Elevator going to","bucket");
                 initialized = true;
             } // end of not initialized
             else {
                 int elevatorPosition = elevatorMotor.getCurrentPosition();
-                boolean isFinished = (elevatorPosition > CLIPMOTORPREBUCKET - 10) || (elapsedTime.seconds() > timeOutSeconds);
+                boolean isFinished = (elevatorPosition > CLIPMOTOR_PREBUCKET - 10) || (elapsedTime.seconds() > timeOutSeconds);
                 packet.put("Elevator Position",elevatorPosition);
                 if (isFinished) {
-                    elevatorMotor.setPower(0);
+                    //elevatorMotor.setPower(0);
                     //elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     //elevatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     stillClippingPosition = false;
@@ -268,15 +271,14 @@ public class ElevatorAction {
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
                 elapsedTime.reset();
-                bucketServo.setPosition(BUCKETIN);
-                twistServo.setPosition(TWISTTRANSFER);
-                rotationServo.setPosition(ROTATIONTRANSFER);
+                bucketServo.setPosition(BUCKET_HOME);
+                twistServo.setPosition(TWIST_TRANSFER);
+                rotationServo.setPosition(ROTATION_TRANSFER);
                 packet.put("PreTransferBlock","Block");
                 initialized = true;
             } // end of not initialized
             else {
-                double preTransferBlockTime = 0.1;
-                boolean isFinished = (elapsedTime.seconds() > preTransferBlockTime);
+                boolean isFinished = (elapsedTime.seconds() > TIME_PRE_TRANSFER);
                 packet.put("PreTransferBlockTime",isFinished);
                 if (isFinished) {
                     stillClippingPosition = false;
@@ -301,7 +303,7 @@ public class ElevatorAction {
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
                 elapsedTime.reset();
-                clawServo.setPosition(CLAWOPEN);
+                clawServo.setPosition(CLAW_OPEN);
                 packet.put("transferBlock","Open Claw");
                 initialized = true;
             } // end of not initialized
@@ -310,7 +312,8 @@ public class ElevatorAction {
                 boolean isFinished = (elapsedTime.seconds() > transferBlockTime);
                 packet.put("transferBlockTime",isFinished);
                 if (isFinished) {
-                    rotationServo.setPosition(ROTATIONNEUTRAL);
+                    rotationServo.setPosition(ROTATION_NEUTRAL);
+                    twistServo.setPosition(TWIST_PICKUP);
                     stillClippingPosition = false;
                     packet.put("Finished transferBlock",isFinished);
                 }
@@ -338,8 +341,7 @@ public class ElevatorAction {
                 initialized = true;
             } // end of not initialized
             else {
-                double transferBlockTime = 0.1;
-                boolean isFinished = (elapsedTime.seconds() > transferBlockTime);
+                boolean isFinished = (elapsedTime.seconds() > TIME_DUMP_BUCKET);
                 packet.put("dumpBucket Time",isFinished);
                 if (isFinished) {
                     bucketServo.setPosition(BUCKETHOME);
@@ -354,5 +356,109 @@ public class ElevatorAction {
 
     public Action DumpBucket() {
         return new dumpBucket();
+    }
+
+    public class pickupBlock implements Action {
+        private boolean initialized = false;
+        private boolean stillopen = true;
+        private boolean stillClippingPosition = true;
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                elapsedTime.reset();
+                clawServo.setPosition(CLAW_OPEN);
+                twistServo.setPosition(TWIST_PICKUP);
+                rotationServo.setPosition(ROTATION_PICKUP);
+                packet.put("PickupBlock","Block");
+                initialized = true;
+            } // end of not initialized
+            else if (stillopen) { // initialized, but give the rotation servo time
+                //double pickupBlockTime = 2;
+                boolean isFinished = (elapsedTime.seconds() > TIME_PICKPUP_BLOCK);
+                packet.put("PickupBlockTime",isFinished);
+                if (isFinished) {
+                    clawServo.setPosition(CLAW_PICKUP);
+                    stillClippingPosition = false;
+                    stillopen = false;
+                    packet.put("Finished stillopen fo rotation; time to close claw",isFinished);
+                }
+            } else { // initialized, rotation servo done, give claw time to close
+                //double closeClawTime = 3;
+                boolean isFinished = (elapsedTime.seconds() > TIME_CLOSE_CLAW);
+                if (isFinished) {
+                    stillClippingPosition = false;
+                    packet.put("Finished PickupBlockTime",isFinished);
+                }
+
+            }// end of else already initialized
+            packet.put("PickupBlockInitialized",initialized);
+            return stillClippingPosition;
+        } // end of run method for pickupBlock Action
+    } // end of pcikupBlock Action
+
+    public Action PickupBlock() {
+        return new pickupBlock();
+    }
+
+    public class hockeyStickOut implements Action {
+        private boolean initialized = false;
+        private boolean stillClippingPosition = true;
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                elapsedTime.reset();
+                hockeystickServo.setPosition(HOCKEYSTICK_OUT);
+                packet.put("HockeyStickOut","Initialized to Out");
+                initialized = true;
+            } // end of not initialized
+            else {
+                boolean isFinished = (elapsedTime.seconds() > TIME_HOCKEY_STICK);
+                packet.put("Hockey Stick Out Time",isFinished);
+                if (isFinished) {
+                    stillClippingPosition = false;
+                    packet.put("Finished hockeyStick",isFinished);
+                }
+            } // end of else already initialized
+            packet.put("Hockey Stick Initialized",initialized);
+            return stillClippingPosition;
+        } // end of run method for transferBlock Action
+    } // end of transferBlock Action
+
+    public Action HockeyStickOut() {
+        return new hockeyStickOut();
+    }
+
+    public class hockeyStickIn implements Action {
+        private boolean initialized = false;
+        private boolean stillClippingPosition = true;
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                elapsedTime.reset();
+                hockeystickServo.setPosition(HOCKEYSTICK_INITIAL);
+                packet.put("HockeyStickIn","Initialized to IN");
+                initialized = true;
+            } // end of not initialized
+            else {
+                boolean isFinished = (elapsedTime.seconds() > TIME_HOCKEY_STICK);
+                packet.put("Hockey Stick In Time",isFinished);
+                if (isFinished) {
+                    stillClippingPosition = false;
+                    packet.put("Finished hockeyStick IN",isFinished);
+                }
+            } // end of else already initialized
+            packet.put("Hockey Stick IN Initialized",initialized);
+            return stillClippingPosition;
+        } // end of run method for transferBlock Action
+    } // end of transferBlock Action
+
+    public Action HockeyStickIn() {
+        return new hockeyStickIn();
     }
 } // end of elevatorAction

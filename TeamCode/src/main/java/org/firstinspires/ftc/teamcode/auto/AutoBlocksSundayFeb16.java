@@ -97,15 +97,10 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
-                // from the wall, back to the sub
-                .setTangent(Math.PI / 2)
-                .splineToSplineHeading(new Pose2d(-0.5, -32.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
-                .waitSeconds(0.5);
+                // park in sub
+                .setTangent(Math.PI/2)
+                .splineTo(new Vector2d(-10, -12), 0);
 
-        TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
-                // try to PARK
-                .setTangent(-Math.PI/2)
-                .strafeTo(new Vector2d(40,-60));
 
         // bar to wall pickup
 
@@ -154,7 +149,7 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         Action fourth = fourthBuilder.build();
         Action fifth = fifthBuilder.build();
         Action sixth = sixthBuilder.build();
-        Action seventh = seventhBuilder.build();
+
 
 
 
@@ -176,11 +171,16 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                         ),
                         // clip it
                         elevator.ClipIt(),
-
-                        second,
+                        new ParallelAction(
+                                second, elevator.HockeyStickOut()
+                        ),
                         third,
                         fourth,
-                        fifth
+                        fifth,
+                        new ParallelAction(
+                                sixth, elevator.HockeyStickIn()
+                        ),
+                        elevator.ClipPark()
 
                         // push fourth block
                         //fourth

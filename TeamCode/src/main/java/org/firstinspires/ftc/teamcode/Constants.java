@@ -56,6 +56,13 @@ public final class Constants {
     public static volatile double CLIPMOTOR_POWERUP = 0.95;
     public static volatile double EXTENSION_POWERMAX = 0.95;
 
+    public static volatile double TIME_PICKPUP_BLOCK = 0.75;
+    public static volatile double TIME_CLOSE_CLAW = 1.25;
+    public static volatile double TIME_PRE_TRANSFER = 0.75;
+
+    public static volatile double TIME_DUMP_BUCKET = 1.5;
+    public static volatile double TIME_HOCKEY_STICK = 0.1;
+
 
 
     // ------------------------------------------------------------------------

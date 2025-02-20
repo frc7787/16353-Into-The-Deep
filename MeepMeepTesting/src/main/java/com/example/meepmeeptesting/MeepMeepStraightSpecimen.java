@@ -7,6 +7,8 @@ import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
+// VERY EARLY all straight specimen pushing
+
 public class MeepMeepStraightSpecimen {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);

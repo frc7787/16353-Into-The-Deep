@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -22,9 +23,9 @@ public class amainCode extends OpMode {
 
     private RevTouchSensor limitSwitch, clipTouchSensor, limitMaxExtension;
     private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
-    private Servo rotationServo, clawServo,twistServo, bucketServo;
-    //old servos not in use anymore extentionLeft,extentionRight
-    private double BUCKETHOME = 0.8;
+    private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
+   //old servos not in use anymore extentionLeft,extentionRight
+   private double BUCKETHOME = 0.8;
     private double BUCKETIN = 0.2;
     private double ROTATIONPICKUP = 0.98;
     private double CLAWPICKUP = 0.46;
@@ -39,6 +40,13 @@ public class amainCode extends OpMode {
     // private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
     // private double ROTATIONNEUTRAL = 0.8;
     // private double ROTATIONTRANSFER = 0.95 ;
+    private double HOCKEYSTICKINITIAL = 0.8;
+    private double HOCKEYSTICKOUT = 0.5;
+
+   // private double ROTATIONPICKUP = 0.22;
+   // private double ROTATIONPREPICKUP = 0.36; // was 0.3, but hitting the sub bar, then 0.33
+   // private double ROTATIONNEUTRAL = 0.8;
+   // private double ROTATIONTRANSFER = 0.95 ;
 
 
     //private double CLAWPICKUP = 0.32;
@@ -54,8 +62,8 @@ public class amainCode extends OpMode {
     //January 23 2025 CLIPMOTORBAR WAS 1850 CHANGED TO 1900
     private int CLIPMOTORBAR = 1880;
     private int CLIPMOTORHOME = 0;
-    private double CLIPMOTORPOWER = 1;
-    private double CLIPMOTORPOWERUP = 0.8;
+    private double CLIPMOTORPOWER = 0.65;
+    private double CLIPMOTORPOWERUP = 0.95;
     private int clipManualTarget = 0;
 
     // private  double NEUTRALCLAW = 0;
@@ -64,7 +72,7 @@ public class amainCode extends OpMode {
     private boolean HOMINGINITCLIP;
     private boolean HOMINGINITEXTENSION;
     private boolean HOMINGCLIP;
-    private ElapsedTime elapsedTime;
+   private ElapsedTime elapsedTime;
 
     private double extensionPower = 0;
     private double EXTENSIONPOWERMAX = 0.95;
@@ -90,14 +98,14 @@ public class amainCode extends OpMode {
         backRight = hardwareMap.dcMotor.get("backRight");
         backLeft = hardwareMap.dcMotor.get("backLeft");
 
-        clipMotor = hardwareMap.dcMotor.get("clipMotor");
+        clipMotor = hardwareMap.dcMotor.get(CLIP_MOTOR_NAME);
         clipMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        clawServo = hardwareMap.get(Servo.class,"clawServo");
-        rotationServo = hardwareMap.get(Servo.class,"rotationServo");
-        bucketServo = hardwareMap.get(Servo.class,"bucketServo");
-        twistServo = hardwareMap.get(Servo.class,"twistServo");
-
+        clawServo = hardwareMap.get(Servo.class,CLAW_SERVO_NAME);
+        rotationServo = hardwareMap.get(Servo.class,ROTATION_SERVO_NAME);
+        bucketServo = hardwareMap.get(Servo.class,BUCKET_SERVO_NAME);
+        twistServo = hardwareMap.get(Servo.class,TWIST_SERVO_NAME);
+        hockeyStickServo = hardwareMap.get(Servo.class, HOCKEYSTICK_SERVO_NAME);
 
 
 
@@ -138,6 +146,12 @@ public class amainCode extends OpMode {
     @Override
     public void start() {
         elapsedTime.reset();
+        //rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
+        hockeyStickServo.setPosition(HOCKEYSTICKINITIAL);
+        rotationServo.setPosition(ROTATIONNEUTRAL);
+        clawServo.setPosition(CLAWOPEN);
+        twistServo.setPosition(TWISTPICKUP);
+        bucketServo.setPosition(BUCKETHOME);
 
     }
 
@@ -146,7 +160,7 @@ public class amainCode extends OpMode {
         if (HOMING) {
             rotationServo.setPosition(ROTATIONNEUTRAL);
             if (HOMINGINITEXTENSION) {
-                // homing the extention, so don't do other claw stuff
+            // homing the extention, so don't do other claw stuff
                 extentionMotor.setPower(-0.2);
                 telemetry.addData("HOMING: limit switch IN is NOT pressed.","HOMING INIT EXTENSION true");
                 if(limitSwitch.isPressed()){
@@ -156,7 +170,7 @@ public class amainCode extends OpMode {
 
                     HOMINGINITEXTENSION = false;
                     telemetry.addData("HOMING: limit switch IN is pressed", "HOMING INIT EXTENSION false");
-                } } // end of IF HOMINGINITEXTENSION
+            } } // end of IF HOMINGINITEXTENSION
             if (HOMINGINITCLIP) {
                 clipMotor.setPower(-0.2);
                 telemetry.addData("HOMING CLIP: limit switch is NOT pressed", "HOMING INIT CLIP true");

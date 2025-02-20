@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -20,15 +21,15 @@ import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 
 @Autonomous
-public class AutoHangQualifiers extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(7.5, -55, -Math.PI / 2);
+public class AutoSweepSpecimen2 extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(45.0, -64, -Math.PI / 2);
 
     private double ROTATIONNEUTRAL = 0.56;
 
-    private double ROTATIONTRANSFER = 0.5;
+    private Servo rotationServo;
 
-    private double TWISTTRANSFER= 0.47;
-    private Servo rotationServo, twistServo;
+    TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
+    ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
 
 
 
@@ -37,8 +38,7 @@ public class AutoHangQualifiers extends LinearOpMode {
 
         ElapsedTime elapsedTime = new ElapsedTime();
         rotationServo = hardwareMap.get(Servo .class,"rotationServo");
-        twistServo = hardwareMap.get(Servo.class,"twistServo");
-
+        rotationServo.setPosition(ROTATIONNEUTRAL);
 
         //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
         //.setPose(initialPose)
@@ -49,55 +49,48 @@ public class AutoHangQualifiers extends LinearOpMode {
         ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // start position to sub for clipping
-                .lineToY(-50)   // north a bit
-                .setTangent(0)
-                .lineToX(4)     // west a bit, more into the center of sub
-                .setTangent(-Math.PI/2)
-                .lineToY(-23);   // north to the sub
+                // from wall at x=18 pre-loaded to sub
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(4,-24),Math.PI/2,fastVelocity,fastAcceleration)
+                .waitSeconds(1);
+
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
-                // sub to behind the left hand spike mark
-                //.waitSeconds(1)     // placeholder for action: CLIP
-                //.afterTime(2, elevator.ClipIt())
-                .setTangent(-Math.PI/2)
-                .lineToY(-30)   // south to a midpoint
-                .setTangent(0)
-                .lineToX(36)    // east towards the spike marks
-                .setTangent(-Math.PI/2)
-                .lineToY(-5)    // north past the left hand spike mark (changed from -6)
-                .setTangent(0)
-                .lineToX(45);    // east to line up with left hand spike mark
+                // FIRST SPIKE MARK
+                // heading towards first spike marks, go midway
+                // need to extend hockey stick
+                .splineToLinearHeading(new Pose2d(24,-48,0),0)
+                // go towards lh spike mark
+                .splineToSplineHeading(new Pose2d(36,-36,Math.PI/4), Math.PI/4)
+                //.waitSeconds(0.5)
+                // sweep 1st block
+                .splineToSplineHeading(new Pose2d(48, -48, -Math.PI/4),-Math.PI/4);
+
+
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-                // parallel with clipHome, push in left hand spike mark, backup
-                // turn around, move in for specimen pickup after a small wait
-
-                .setTangent(-Math.PI/2)
-                .lineToY(-60)   // south to push sample into zone
-                .setTangent(-Math.PI/2)
-                .lineToY(-55)   // north, backup out of zone
-                // new position of turn
-                .turn(Math.PI)      // spin around for gripper to face wall
-                .setTangent(Math.PI/2)
-                .lineToY(-65)   // south to intermediate point, human player lines up specimen (was -62)
-                .waitSeconds(2)
-                .setTangent(Math.PI/2)
-                .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
-        //.lineToY(-71);  // south to pickup specimen
+                // SECOND SPIKE MARK
+                // go towards middle spike mark
+                .splineToLinearHeading(new Pose2d(44, -36,Math.PI/3),Math.PI/3)
+                //.waitSeconds(2)
+                // sweep 2nd block
+                // execute a small turn, hopefully sweeping the block a bit
+                .splineToSplineHeading(new Pose2d(52,-34,0),-Math.PI/3)
+                //.waitSeconds(2)
+                // bring the block down into the observation zone
+                .splineToConstantHeading(new Vector2d(52,-56),-Math.PI/2);
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // from pickup specimen to clipping
-                .lineToY(-55)
-                .setTangent(0)
-                .lineToX(-1)
+                // TIME TO GO TO WALL FOR CLIPPING
+                // retract hockey stick
+                // move to wall
+                .splineToSplineHeading(new Pose2d(48, -60, Math.PI / 2), -Math.PI / 2)
+                //.waitSeconds(1)
+                .setTangent(Math.PI/2)
+                .lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
 
-                //.turnTo(-Math.PI/2)
-                .turnTo(-Math.PI/2,
-                        new TurnConstraints(2*Math.PI/3,-2*Math.PI/3,2*Math.PI/3))
-                .setTangent(-Math.PI/2)
-                .lineToY(-23);
+
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // from pickup specimen to clipping
@@ -129,13 +122,11 @@ public class AutoHangQualifiers extends LinearOpMode {
         Action second = secondBuilder.build();
         Action third = thirdBuilder.build();
         Action fourth = fourthBuilder.build();
-        Action fifth = fifthBuilder.build();
+        //Action fifth = fifthBuilder.build();
 
 
 
         while (!isStopRequested() && !opModeIsActive()) {
-            rotationServo.setPosition(ROTATIONNEUTRAL);
-            twistServo.setPosition(TWISTTRANSFER);
             Pose2d position = drive.localizer.getPose();
             telemetry.addData("Position during Init", position);
             telemetry.update();
@@ -154,34 +145,12 @@ public class AutoHangQualifiers extends LinearOpMode {
                         // clip it
                         elevator.ClipIt(),
 
-                        // in front of spike mark
+                        // get all the blocks on spike marks
                         new ParallelAction(
-                                second
+                                elevator.ClipHome(), second
                         ),
-
-                        // elevator to home, drive spike mark to wall, pickup specimen
-                        new ParallelAction(
-                                elevator.ClipHome(), third
-                        ),
-
-                        // pickup specimen from wall
-                        elevator.ClippingPosition(),
-
-                        // go to sub and clip
-                        new ParallelAction(
-                                fourth
-                        ),
-
-                        // clip second specimen
-                        elevator.ClipIt(),
-
-                        // clip it and backup and try to park
-                        new ParallelAction(
-                                elevator.ClipIt(),fifth
-                        ),
-
-                        // homing elevator
-                        elevator.ClipHome()
+                        third,
+                        fourth
 
 
                 ) // end of Sequential Action

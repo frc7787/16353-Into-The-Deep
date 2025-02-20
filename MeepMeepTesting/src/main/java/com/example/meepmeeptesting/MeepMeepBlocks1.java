@@ -7,6 +7,9 @@ import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
+
+// straight line paths for clearing blocks
+
 public class MeepMeepBlocks1 {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);

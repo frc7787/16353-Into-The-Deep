@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -18,17 +19,17 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 @Autonomous
-public class AutoHangQualifiers extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(7.5, -55, -Math.PI / 2);
+public class AutoSubSpecimens extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(18.0, -64, -Math.PI / 2);
 
-    private double ROTATIONNEUTRAL = 0.56;
 
-    private double ROTATIONTRANSFER = 0.5;
+    private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
 
-    private double TWISTTRANSFER= 0.47;
-    private Servo rotationServo, twistServo;
+    TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
+    ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
 
 
 
@@ -36,9 +37,17 @@ public class AutoHangQualifiers extends LinearOpMode {
     @Override public void runOpMode() {
 
         ElapsedTime elapsedTime = new ElapsedTime();
-        rotationServo = hardwareMap.get(Servo .class,"rotationServo");
-        twistServo = hardwareMap.get(Servo.class,"twistServo");
+        rotationServo = hardwareMap.get(Servo .class,ROTATION_SERVO_NAME);
+        hockeyStickServo = hardwareMap.get(Servo.class, HOCKEYSTICK_SERVO_NAME);
+        twistServo = hardwareMap.get(Servo.class, TWIST_SERVO_NAME);
+        clawServo = hardwareMap.get(Servo.class, CLAW_SERVO_NAME);
+        bucketServo = hardwareMap.get(Servo.class, BUCKET_SERVO_NAME);
 
+        rotationServo.setPosition(ROTATION_NEUTRAL);
+        hockeyStickServo.setPosition(HOCKEYSTICK_INITIAL);
+        twistServo.setPosition(TWIST_INITIAL);
+        clawServo.setPosition(CLAW_OPEN);
+        bucketServo.setPosition(BUCKET_HOME);
 
         //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
         //.setPose(initialPose)
@@ -49,55 +58,53 @@ public class AutoHangQualifiers extends LinearOpMode {
         ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // start position to sub for clipping
-                .lineToY(-50)   // north a bit
-                .setTangent(0)
-                .lineToX(4)     // west a bit, more into the center of sub
-                .setTangent(-Math.PI/2)
-                .lineToY(-23);   // north to the sub
+                // starting pre-loaded to sub
+                .setReversed(true)
+                //.splineToConstantHeading(new Vector2d(4,-24),Math.PI/2,fastVelocity,fastAcceleration)
+                .splineToConstantHeading(new Vector2d(4,-33.5),Math.PI/2,null,null)
+
+                .waitSeconds(0.5);
+
+        // bar to wall pickup
+
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
-                // sub to behind the left hand spike mark
-                //.waitSeconds(1)     // placeholder for action: CLIP
-                //.afterTime(2, elevator.ClipIt())
-                .setTangent(-Math.PI/2)
-                .lineToY(-30)   // south to a midpoint
-                .setTangent(0)
-                .lineToX(36)    // east towards the spike marks
-                .setTangent(-Math.PI/2)
-                .lineToY(-5)    // north past the left hand spike mark (changed from -6)
-                .setTangent(0)
-                .lineToX(45);    // east to line up with left hand spike mark
+                // FIRST SPIKE MARK
+                // heading towards first spike marks, go midway
+                // need to extend hockey stick
+                .splineToLinearHeading(new Pose2d(24,-45,0),0)
+                // go towards lh spike mark
+                .splineToSplineHeading(new Pose2d(37,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(45,-21),0)
+                // push block into zone
+                .splineToSplineHeading(new Pose2d(48,-61,Math.PI/2),-Math.PI/2);
+
+
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-                // parallel with clipHome, push in left hand spike mark, backup
-                // turn around, move in for specimen pickup after a small wait
-
-                .setTangent(-Math.PI/2)
-                .lineToY(-60)   // south to push sample into zone
-                .setTangent(-Math.PI/2)
-                .lineToY(-55)   // north, backup out of zone
-                // new position of turn
-                .turn(Math.PI)      // spin around for gripper to face wall
-                .setTangent(Math.PI/2)
-                .lineToY(-65)   // south to intermediate point, human player lines up specimen (was -62)
-                .waitSeconds(2)
-                .setTangent(Math.PI/2)
-                .lineToY(-71.5,null,new ProfileAccelConstraint(-70.0,70.0));
-        //.lineToY(-71);  // south to pickup specimen
+                // SECOND SPIKE MARK
+                // heading back up to second spike mark
+                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
+                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(56,-21),0)
+                // push block into zone
+                .splineToSplineHeading(new Pose2d(56,-61,Math.PI/2),-Math.PI/2);
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // from pickup specimen to clipping
-                .lineToY(-55)
-                .setTangent(0)
-                .lineToX(-1)
+                // THIRD SPIKE MARK
+                // heading back up to third spike mark
+                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
+                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(64,-21),0)
+                // push block into zone
+                .splineToLinearHeading(new Pose2d(56,-61,Math.PI/2),-Math.PI/2)
+                .splineToLinearHeading(new Pose2d(50,-60,Math.PI/2),-Math.PI/2);
 
-                //.turnTo(-Math.PI/2)
-                .turnTo(-Math.PI/2,
-                        new TurnConstraints(2*Math.PI/3,-2*Math.PI/3,2*Math.PI/3))
-                .setTangent(-Math.PI/2)
-                .lineToY(-23);
+
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // from pickup specimen to clipping
@@ -129,13 +136,11 @@ public class AutoHangQualifiers extends LinearOpMode {
         Action second = secondBuilder.build();
         Action third = thirdBuilder.build();
         Action fourth = fourthBuilder.build();
-        Action fifth = fifthBuilder.build();
+        //Action fifth = fifthBuilder.build();
 
 
 
         while (!isStopRequested() && !opModeIsActive()) {
-            rotationServo.setPosition(ROTATIONNEUTRAL);
-            twistServo.setPosition(TWISTTRANSFER);
             Pose2d position = drive.localizer.getPose();
             telemetry.addData("Position during Init", position);
             telemetry.update();
@@ -154,34 +159,14 @@ public class AutoHangQualifiers extends LinearOpMode {
                         // clip it
                         elevator.ClipIt(),
 
-                        // in front of spike mark
+                        // push second block
                         new ParallelAction(
-                                second
+                                elevator.ClipHome(), second
                         ),
-
-                        // elevator to home, drive spike mark to wall, pickup specimen
-                        new ParallelAction(
-                                elevator.ClipHome(), third
-                        ),
-
-                        // pickup specimen from wall
-                        elevator.ClippingPosition(),
-
-                        // go to sub and clip
-                        new ParallelAction(
-                                fourth
-                        ),
-
-                        // clip second specimen
-                        elevator.ClipIt(),
-
-                        // clip it and backup and try to park
-                        new ParallelAction(
-                                elevator.ClipIt(),fifth
-                        ),
-
-                        // homing elevator
-                        elevator.ClipHome()
+                        // push third block
+                        third,
+                        // push fourth block
+                        fourth
 
 
                 ) // end of Sequential Action

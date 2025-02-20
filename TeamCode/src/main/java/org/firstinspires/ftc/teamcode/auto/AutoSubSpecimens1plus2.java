@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -16,19 +15,21 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction2;
+import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 @Autonomous
-public class AutoWallToHang extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(50.0, -64, Math.PI / 2);
+public class AutoSubSpecimens1plus2 extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(18.0, -64, -Math.PI / 2);
 
 
     private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
+
+    TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
+    ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
 
 
 
@@ -48,67 +49,74 @@ public class AutoWallToHang extends LinearOpMode {
         clawServo.setPosition(CLAW_OPEN);
         bucketServo.setPosition(BUCKET_HOME);
 
-        TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
-        ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
-
-
         //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
         //.setPose(initialPose)
         //.build();
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        ElevatorAction2 elevator = new ElevatorAction2(hardwareMap);
+        ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // start position of wall to sub
-                //.setTangent(Math.PI/2)
-                //.lineToY(-60, null, new ProfileAccelConstraint(-70.0, 70.0))
-                //.lineToY(-60, null, null)
-                //.strafeTo(new Vector2d(50,-60))
-                //.setTangent(Math.PI/2)
-                .splineToSplineHeading(new Pose2d(4, -31.0, -Math.PI /1.999), Math.PI / 2, null, null)
+                // starting pre-loaded to sub
+                .setReversed(true)
+                //.splineToConstantHeading(new Vector2d(4,-24),Math.PI/2,fastVelocity,fastAcceleration)
+                .splineToConstantHeading(new Vector2d(4,-33.5),Math.PI/2,null,null)
+
                 .waitSeconds(0.5);
-                // bar to wall pickup
+
+        // bar to wall pickup
 
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
-                // sub to the wall
-                .setTangent(-Math.PI/2)
-                .splineToSplineHeading(new Pose2d(50, -58, Math.PI / 2), -Math.PI / 2, null,null)
-                .waitSeconds(1)
-                //.setTangent(Math.PI/2)
-                //.lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
-                .strafeTo(new Vector2d(50,-64), null, null);
+                // FIRST SPIKE MARK
+                // heading towards first spike marks, go midway
+                // need to extend hockey stick
+                .splineToLinearHeading(new Pose2d(24,-45,0),0)
+                // go towards lh spike mark
+                .splineToSplineHeading(new Pose2d(37,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(45,-21),0)
+                // push block into zone
+                .splineToSplineHeading(new Pose2d(48,-61,Math.PI/2),-Math.PI/2);
 
 
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-                // from the wall, back to the sub
-                .setTangent(Math.PI / 2)
-                .splineToSplineHeading(new Pose2d(-0.5, -28.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
-                .waitSeconds(0.5);
+                // SECOND SPIKE MARK
+                // heading back up to second spike mark
+                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
+                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(56,-21),0)
+                // push block into zone
+                .splineToSplineHeading(new Pose2d(56,-50,Math.PI/2),-Math.PI/2)
+                // ADD in the movement away from the wall to prepare for specimen pickup
+                .splineToLinearHeading(new Pose2d(50,-56,Math.PI/2),Math.PI/2)
+                .waitSeconds(0.5)
+                .strafeTo(new Vector2d(50,-67));
 
 
+/*  SKIP THE THIRD SPIKE MARK - IT TAKES TOO LONG
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // try to PARK
-                .setTangent(-Math.PI/2)
-                .strafeTo(new Vector2d(40,-60));
+                // THIRD SPIKE MARK
+                // heading back up to third spike mark
+                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
+                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
+                // almost there
+                .splineToConstantHeading(new Vector2d(64,-21),0)
+                // push block into zone
+                .splineToLinearHeading(new Pose2d(56,-61,Math.PI/2),-Math.PI/2)
+                .splineToLinearHeading(new Pose2d(50,-60,Math.PI/2),-Math.PI/2);
 
-                //.turnTo(-Math.PI/2)
-                //.turnTo(-Math.PI/2,
-                        //new TurnConstraints(2*Math.PI/3,-2*Math.PI/3,2*Math.PI/3))
-                //.setTangent(-Math.PI/2)
-                //.lineToY(-23);
-
-        TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
+            TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // from pickup specimen to clipping
-                .setTangent(-Math.PI/2)
-                .lineToY(-30) //-48
-                .setTangent(-Math.PI/6)  // 0
-                //.lineToX(48,null, new ProfileAccelConstraint(-70.0,70.0));
-                .lineToXLinearHeading(48,-Math.PI/6, null, new ProfileAccelConstraint(-70.0,70.0));
-        //.lineToX(48);  //48
+        ;
+ */
+
+
+
+
 
 
 
@@ -130,7 +138,7 @@ public class AutoWallToHang extends LinearOpMode {
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
         Action third = thirdBuilder.build();
-        Action fourth = fourthBuilder.build();
+        //Action fourth = fourthBuilder.build();
         //Action fifth = fifthBuilder.build();
 
 
@@ -144,33 +152,24 @@ public class AutoWallToHang extends LinearOpMode {
         waitForStart();
         elapsedTime.reset();
 
+
         Actions.runBlocking(
                 new SequentialAction(
                         // to the sub then clipping
                         new ParallelAction(
-                                first,
-                                elevator.ClippingPosition()
+                                first, elevator.ClippingPosition()
                         ),
                         // clip it
-
                         elevator.ClipIt(),
 
-                        // back to the wall
+                        // push second block
                         new ParallelAction(
                                 elevator.ClipHome(), second
                         ),
-
-                        // back to the sub
-                        new ParallelAction(
-                                elevator.ClippingPosition(), third
-                        ),
-                        elevator.ClipIt(),
-
-                        // desperately try to park!
-                        fourth,
-                        elevator.ClipHome()
-
-
+                        // push third block
+                        third
+                        // push fourth block
+                        //fourth
 
 
                 ) // end of Sequential Action
@@ -196,5 +195,6 @@ public class AutoWallToHang extends LinearOpMode {
         //Actions.runBlocking(bookItToObservationZone);
     }
 }
+
 
 

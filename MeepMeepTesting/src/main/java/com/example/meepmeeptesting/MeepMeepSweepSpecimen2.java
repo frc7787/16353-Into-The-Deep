@@ -2,6 +2,7 @@ package com.example.meepmeeptesting;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 
@@ -14,8 +15,13 @@ import java.util.Map;
 // beginning test of sweeping specimens with hockey stick
 // this uses just a turn, which probably won't work
 
-public class MeepMeepSweepSpecimen {
+public class MeepMeepSweepSpecimen2 {
+
+
     public static void main(String[] args) {
+        TranslationalVelConstraint fastVelocity = new TranslationalVelConstraint(60);
+        ProfileAccelConstraint fastAcceleration = new ProfileAccelConstraint(-40,60);
+
         MeepMeep meepMeep = new MeepMeep(800);
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
@@ -24,46 +30,39 @@ public class MeepMeepSweepSpecimen {
                 .setDimensions(14.685, 13.5)
                 .build();
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(7.5, -60, -Math.PI / 2))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(18, -60, -Math.PI / 2))
 
-                //.strafeToConstantHeading(new Vector2d(0,-24))
-                //.strafeToLinearHeading(new Vector2d(0,-24),Math.PI/2)
-                //.strafeToSplineHeading(new Vector2d(48,-60),-Math.PI/2)
-                //.strafeToSplineHeading(new Vector2d(0,-24),Math.PI/2)
-                //.waitSeconds(2)
-                //.strafeToSplineHeading(new Vector2d(0,-30),Math.PI/2)
-                //.strafeToSplineHeading(new Vector2d(48,-60),-Math.PI/2)
-                //.strafeToSplineHeading(new Vector2d(48,-64),-Math.PI/2)
-                //.setReversed(true)
-                //.splineTo(new Vector2d(0,-24),Math.PI/2)
-                //.setReversed(true)
-                //.setTangent(0)
-                // at the sub, go midway to lh spike mark
-
-                // start at wall in front of sub
-                // go to sub for clipping pre-loaded clip
-                .splineToConstantHeading(new Vector2d(4,-24),-Math.PI/2)
-                // clip
+                // from wall at x=18 pre-loaded to sub
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(4,-24),Math.PI/2,fastVelocity,fastAcceleration)
                 .waitSeconds(1)
+
+                // FIRST SPIKE MARK
                 // heading towards first spike marks, go midway
                 // need to extend hockey stick
                 .splineToLinearHeading(new Pose2d(24,-48,0),0)
                 // go towards lh spike mark
                 .splineToSplineHeading(new Pose2d(36,-36,Math.PI/4), Math.PI/4)
-                .waitSeconds(0.5)
+                //.waitSeconds(0.5)
                 // sweep 1st block
-                .turnTo(-Math.PI/4, new TurnConstraints(Math.PI,-Math.PI,Math.PI))
+                .splineToSplineHeading(new Pose2d(48, -48, -Math.PI/4),-Math.PI/4)
+
+                // SECOND SPIKE MARK
                 // go towards middle spike mark
-                .splineToSplineHeading(new Pose2d(48, -36,Math.PI/3),Math.PI/3)
+                .splineToLinearHeading(new Pose2d(44, -36,Math.PI/3),Math.PI/3)
+                //.waitSeconds(2)
                 // sweep 2nd block
-                .turnTo(-Math.PI/3, new TurnConstraints(Math.PI,-Math.PI,Math.PI))
-                // go towards rh spike mark
-                .splineToSplineHeading(new Pose2d(60, -36,Math.PI/3),Math.PI/3)
-                .turnTo(-Math.PI/2, new TurnConstraints(Math.PI,-Math.PI,Math.PI))
+                // execute a small turn, hopefully sweeping the block a bit
+                .splineToSplineHeading(new Pose2d(52,-34,0),-Math.PI/3)
+                //.waitSeconds(2)
+                // bring the block down into the observation zone
+                .splineToConstantHeading(new Vector2d(52,-56),-Math.PI/2)
+
+                // TIME TO GO TO WALL FOR CLIPPING
                 // retract hockey stick
                 // move to wall
-                .splineToSplineHeading(new Pose2d(45, -56, Math.PI / 2), -Math.PI / 2)
-                .waitSeconds(1)
+                .splineToSplineHeading(new Pose2d(48, -60, Math.PI / 2), -Math.PI / 2)
+                //.waitSeconds(1)
                 .setTangent(Math.PI/2)
                 .lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0))
 

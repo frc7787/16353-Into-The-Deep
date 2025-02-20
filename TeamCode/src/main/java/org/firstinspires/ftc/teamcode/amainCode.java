@@ -62,8 +62,8 @@ public class amainCode extends OpMode {
     //January 23 2025 CLIPMOTORBAR WAS 1850 CHANGED TO 1900
     private int CLIPMOTORBAR = 1880;
     private int CLIPMOTORHOME = 0;
-    private double CLIPMOTORPOWER = 0.65;
-    private double CLIPMOTORPOWERUP = 0.95;
+    private double CLIPMOTORPOWER = 0.75;
+    private double CLIPMOTORPOWERUP = 1.0;
     private int clipManualTarget = 0;
 
     // private  double NEUTRALCLAW = 0;

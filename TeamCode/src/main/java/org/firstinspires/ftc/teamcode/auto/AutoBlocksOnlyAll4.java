@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 @Autonomous
-public class AutoBlocksSundayFeb16 extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(-18.0, -64, -Math.PI / 2);
+public class AutoBlocksOnlyAll4 extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(-40.0, -66.5, 0); // changed y from -65
 
 
     private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
@@ -61,8 +61,9 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 // starting pre-loaded to sub
                 .setReversed(true)
                 //hang specimen onto bar
-                .splineToConstantHeading(new Vector2d(-4,-33.5),Math.PI/2)
-                .waitSeconds(0.5);
+                //.splineToConstantHeading(new Vector2d(-4,-33.5),Math.PI/2)
+                .splineToConstantHeading(new Vector2d(-47,-65), Math.PI);
+                //.waitSeconds(1);
 
         // bar to wall pickup
 
@@ -70,8 +71,12 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 // FIRST SPIKE MARK, head towards
 
-                .splineToLinearHeading(new Pose2d(-24,-48,Math.PI),Math.PI)
+                //.splineToLinearHeading(new Pose2d(-24,-48,Math.PI),Math.PI)
+                //.splineToSplineHeading(new Pose2d( -48,-45,Math.PI/2),Math.PI/2);
+                .setTangent(Math.PI/2)
+                .strafeTo(new Vector2d(-47,-60))
                 .splineToSplineHeading(new Pose2d( -48,-45,Math.PI/2),Math.PI/2);
+
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
 
@@ -79,7 +84,7 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 .strafeTo(new Vector2d(-55,-45))
                 //.strafeTo(new Vector2d(-50,-45))
                 .strafeTo(new Vector2d(-50,-43));
-                //.waitSeconds(0.5);
+        //.waitSeconds(0.5);
 
 
 
@@ -87,7 +92,7 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 // Bucket 1
 
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
-                //.waitSeconds(0.5);
+        //.waitSeconds(0.5);
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // Spike Mark 2
@@ -97,8 +102,8 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 .strafeTo(new Vector2d(-62,-40));
                  */
                 .splineToSplineHeading(new Pose2d(-53,-45,Math.PI/2),Math.PI/2)
-                .strafeTo(new Vector2d(-65,-45))
-                .strafeTo(new Vector2d(-60,-43));
+                .strafeTo(new Vector2d(-63.5,-45)) // changed from -64, to stop hitting wall
+                .strafeTo(new Vector2d(-59,-43));
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
                 // Bucket 2
@@ -108,7 +113,27 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                 // park in sub
                 //.setTangent(Math.PI/2)
                 //.splineTo(new Vector2d(-10, -8), 0);
-                .splineToLinearHeading(new Pose2d(-10,-8,Math.PI),0)
+                //.splineToLinearHeading(new Pose2d(-10,-8,Math.PI),0);
+                .setTangent(Math.PI/4)
+                .splineToLinearHeading(new Pose2d(-57.5,-40.0,3*Math.PI/4),3*Math.PI/4);
+                // changed from -57,-39.5 to
+
+        TrajectoryActionBuilder eighthBuilder = seventhBuilder.endTrajectory().fresh()
+                // Bucket 2
+                .setTangent(-Math.PI/4)
+                .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
+
+        TrajectoryActionBuilder ninthBuilder = eighthBuilder.endTrajectory().fresh()
+                // park in sub
+                //.setTangent(Math.PI/2)
+                //.splineTo(new Vector2d(-10, -8), 0);
+                .setTangent(Math.PI/2)
+                .splineToLinearHeading(new Pose2d(-20,-9,0),0);
+
+
+
+
+
 
 
         // bar to wall pickup
@@ -137,20 +162,22 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
 
 
 
-        //TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
-        // extra one just in case you want to add something
-        ;
+                //TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
+                // extra one just in case you want to add something
+
         // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
         // north a bit, turn around again (tangents will now be NEGATIVE again)
         // west towards sub, north to sub, action: clipping, reverse to park if possible
 
-
+/*
         TrajectoryActionBuilder extraBuilder = firstBuilder.endTrajectory().fresh()
                 .waitSeconds(5)
                 .lineToY(-48)
                 .waitSeconds(3)
                 .setTangent(0)
                 .lineToX(0);
+
+ */
 
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
@@ -159,6 +186,8 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         Action fifth = fifthBuilder.build();
         Action sixth = sixthBuilder.build();
         Action seventh = seventhBuilder.build();
+        Action eighth = eighthBuilder.build();
+        Action ninth = ninthBuilder.build();
 
 
 
@@ -175,17 +204,18 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        // to the sub then clipping
+                        // to the bucket
                         new ParallelAction(
-                                first, elevator.ClippingPosition()
+                                first, elevator.BucketPosition()
                         ),
-                        // clip it
-                        elevator.ClipIt(),
-                        new ParallelAction(elevator.ClipHome(),second),
+                        // dump the preloaded
+                        elevator.DumpBucket(),
+                        new ParallelAction(elevator.ClipHome(),elevator.HockeyStickOut(),
+                                new SequentialAction(second, third)),
                         // towards spike mark 1
-                        new ParallelAction(
-                                third, elevator.HockeyStickOut()    // strafe into block, then pickup
-                        ),
+                        //new ParallelAction(
+                        //        third   // strafe into block, then pickup
+                        //),
                         elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
                         // bucket deposit 1
                         new ParallelAction(
@@ -193,20 +223,27 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
                         ),
                         elevator.DumpBucket(),
                         // towards spike mark 2
-                        new ParallelAction(
-                                fifth,elevator.ClipHome()
+                        new ParallelAction(elevator.ClipHome(),
+                                new SequentialAction(fifth,
+                                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
+
                         ),
-                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
                         // bucket deposit 2
                         new ParallelAction(
                                 sixth, elevator.BucketPosition()
                         ),
                         elevator.DumpBucket(),
                         // park
-                        new ParallelAction(seventh,
-                                elevator.ClipIt(),elevator.HockeyStickIn(),elevator.PreTransferBlock()),
-                        elevator.ClipPark()
-
+                        //new ParallelAction(seventh,
+                        //        elevator.ClipIt(),elevator.HockeyStickIn(),elevator.PreTransferBlock()),
+                        //elevator.ClipPark()
+                        new ParallelAction(elevator.ClipHome(),elevator.HockeyStickIn(),
+                                new SequentialAction(seventh,
+                                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
+                        ),
+                        new ParallelAction(elevator.BucketPosition(),eighth),
+                        elevator.DumpBucket(),
+                        new ParallelAction(elevator.ClipHome(),ninth,elevator.HockeyStickPark())
 
 
                 ) // end of Sequential Action
@@ -232,6 +269,7 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         //Actions.runBlocking(bookItToObservationZone);
     }
 }
+
 
 
 

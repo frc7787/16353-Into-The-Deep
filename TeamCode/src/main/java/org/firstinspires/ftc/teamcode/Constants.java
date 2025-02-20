@@ -47,20 +47,24 @@ public final class Constants {
     // HOCKEY STICK servo
     public static volatile double HOCKEYSTICK_INITIAL = 0.8;
     public static volatile double HOCKEYSTICK_OUT = 0.4;
+    public static volatile double HOCKEYSTICK_PARK = 0.74;
     // MOTORS
     public static volatile int EXTENSION_MAX =2350;
     public static volatile int CLIPMOTOR_PREBUCKET = 3054;
     public static volatile int CLIPMOTOR_BAR = 1880;
     public static volatile int CLIPMOTOR_HOME = 0;
     public static volatile double CLIPMOTOR_POWER = 0.65;
-    public static volatile double CLIPMOTOR_POWERUP = 0.95;
+    public static volatile double CLIPMOTOR_POWERUP = 1.0;
+    public static volatile double CLIPMOTOR_POWERDOWN = 0.85;
+    public static volatile double CLIPMOTOR_POWERDOWN_CLIPIT = 0.5;
     public static volatile double EXTENSION_POWERMAX = 0.95;
 
-    public static volatile double TIME_PICKPUP_BLOCK = 1;
-    public static volatile double TIME_CLOSE_CLAW = 1.25;
+    public static volatile double TIME_PICKPUP_BLOCK = 0.75;
+    public static volatile double TIME_CLOSE_CLAW = 0.75;
     public static volatile double TIME_PRE_TRANSFER = 0.75;
-    public static volatile double TIME_DUMP_BUCKET = 1.25;
+    public static volatile double TIME_DUMP_BUCKET = 1.0;
     public static volatile double TIME_HOCKEY_STICK = 1;
+    public static volatile double TIME_TRANSFER_BLOCK = 0.5;
 
 
 

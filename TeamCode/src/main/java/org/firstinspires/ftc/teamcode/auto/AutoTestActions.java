@@ -58,7 +58,8 @@ public class AutoTestActions extends  LinearOpMode{
                         elevator.TransferBlock(),
                         elevator.BucketPosition(),
                         elevator.DumpBucket(),
-                        elevator.ClipHome()
+                        elevator.ClipHome(),
+                        elevator.HockeyStickPark()
         )
 
         );

@@ -117,7 +117,7 @@ public class ElevatorAction {
                 elapsedTime.reset();
                 elevatorMotor.setTargetPosition(CLIPPING);
                 elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                elevatorMotor.setPower(CLIPMOTORPOWERDOWN);
+                elevatorMotor.setPower(CLIPMOTOR_POWERDOWN_CLIPIT);
 
                 packet.put("Elevator clipping","Initialize");
                 initializedClipit = true;
@@ -155,7 +155,7 @@ public class ElevatorAction {
                 elapsedTime.reset();
                 elevatorMotor.setTargetPosition(CLIPMOTORHOME);
                 elevatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                elevatorMotor.setPower(CLIPMOTORPOWERDOWN);
+                elevatorMotor.setPower(CLIPMOTOR_POWERDOWN);
 
                 packet.put("Elevator homing","to the bottom");
                 initialized = true;
@@ -308,8 +308,7 @@ public class ElevatorAction {
                 initialized = true;
             } // end of not initialized
             else {
-                double transferBlockTime = 0.1;
-                boolean isFinished = (elapsedTime.seconds() > transferBlockTime);
+                boolean isFinished = (elapsedTime.seconds() > TIME_TRANSFER_BLOCK);
                 packet.put("transferBlockTime",isFinished);
                 if (isFinished) {
                     rotationServo.setPosition(ROTATION_NEUTRAL);
@@ -377,19 +376,18 @@ public class ElevatorAction {
             else if (stillopen) { // initialized, but give the rotation servo time
                 //double pickupBlockTime = 2;
                 boolean isFinished = (elapsedTime.seconds() > TIME_PICKPUP_BLOCK);
-                packet.put("PickupBlockTime",isFinished);
+                packet.put("PickupBlockTime",elapsedTime.seconds());
                 if (isFinished) {
                     clawServo.setPosition(CLAW_PICKUP);
-                    stillClippingPosition = false;
                     stillopen = false;
-                    packet.put("Finished stillopen fo rotation; time to close claw",isFinished);
+                    packet.put("Finished stillopen for rotation; time to close claw",elapsedTime.seconds());
                 }
             } else { // initialized, rotation servo done, give claw time to close
                 //double closeClawTime = 3;
-                boolean isFinished = (elapsedTime.seconds() > TIME_CLOSE_CLAW);
+                boolean isFinished = (elapsedTime.seconds() > (TIME_PICKPUP_BLOCK + TIME_CLOSE_CLAW));
                 if (isFinished) {
                     stillClippingPosition = false;
-                    packet.put("Finished PickupBlockTime",isFinished);
+                    packet.put("Finished PickupBlockTime",elapsedTime.seconds());
                 }
 
             }// end of else already initialized
@@ -460,5 +458,35 @@ public class ElevatorAction {
 
     public Action HockeyStickIn() {
         return new hockeyStickIn();
+    }
+
+    public class hockeyStickPark implements Action {
+        private boolean initialized = false;
+        private boolean stillClippingPosition = true;
+
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                elapsedTime.reset();
+                hockeystickServo.setPosition(HOCKEYSTICK_PARK);
+                packet.put("HockeyStickIn","Initialized to IN");
+                initialized = true;
+            } // end of not initialized
+            else {
+                boolean isFinished = (elapsedTime.seconds() > TIME_HOCKEY_STICK);
+                packet.put("Hockey Stick In Time",isFinished);
+                if (isFinished) {
+                    stillClippingPosition = false;
+                    packet.put("Finished hockeyStick IN",isFinished);
+                }
+            } // end of else already initialized
+            packet.put("Hockey Stick IN Initialized",initialized);
+            return stillClippingPosition;
+        } // end of run method for transferBlock Action
+    } // end of transferBlock Action
+
+    public Action HockeyStickPark() {
+        return new hockeyStickPark();
     }
 } // end of elevatorAction

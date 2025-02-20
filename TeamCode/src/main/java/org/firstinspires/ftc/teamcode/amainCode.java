@@ -172,6 +172,7 @@ public class amainCode extends OpMode {
             HOMING = (HOMINGINITEXTENSION || HOMINGINITCLIP) && (elapsedTime.seconds()<3);
         } else {  // NOT HOMING extention, so other stuff can happen
             extensionPower = -gamepad2.left_stick_y;
+
             if (extensionPower > EXTENSIONPOWERMAX) { // extension power from stick too big
                 extensionPower = EXTENSIONPOWERMAX;
             } else if (extensionPower < -EXTENSIONPOWERMAX) { // extension power from stick too big negative
@@ -202,7 +203,8 @@ public class amainCode extends OpMode {
             else {
                 telemetry.addData("Extension Power:", extensionPower);
                 telemetry.addData("Extension Position:", extensionPosition);
-                if ((extensionPosition > (EXTENSIONMAX - 200)) || (extensionPosition < 200)) {
+                if (((extensionPosition > (EXTENSIONMAX - 200)&& extensionPower>0) || ((extensionPosition < 200)&& extensionPower<0))) {
+
                     extentionMotor.setPower(extensionPower*0.5);
                 } else{
                     extentionMotor.setPower(extensionPower);

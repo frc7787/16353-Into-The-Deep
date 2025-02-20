@@ -34,7 +34,7 @@ public class ElevatorAction {
     private int CLIPMOTORPREBUCKET = 3054;
     //private int CLIPMOTORBAR = 1880;
     //public static volatile int CLIPMOTORBAR = 1980;
-    private int CLIPPING = CLIPMOTOR_BAR - 450;
+    private int CLIPPING = CLIPMOTOR_BAR - 650;  // changed from 450
     private int CLIPMOTORPARK = 1175;
     private int CLIPMOTORHOME = 0;
     private double CLIPMOTORPOWER = 0.95;

@@ -109,7 +109,7 @@ public class AutoHang2plus1 extends LinearOpMode {
                 .waitSeconds(1)
                 //.setTangent(Math.PI/2)
                 //.lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
-                .strafeTo(new Vector2d(50,-65.5), null, null);
+                .strafeTo(new Vector2d(50,-66.5), null, null); // BACK ONE MORE
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
                 // from the wall, back to the sub
@@ -191,7 +191,6 @@ public class AutoHang2plus1 extends LinearOpMode {
                         ),
                         // clip it
                         elevator.ClipIt(),
-
                         // push second block
                         new ParallelAction(
                                 elevator.ClipHome(), second

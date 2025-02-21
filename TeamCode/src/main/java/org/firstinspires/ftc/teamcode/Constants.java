@@ -45,7 +45,7 @@ public final class Constants {
     public static volatile double TWIST_INITIAL = 0.6;
     public static volatile double TWIST_PICKUP= 1;
     // HOCKEY STICK servo
-    public static volatile double HOCKEYSTICK_INITIAL = 0.8;
+    public static volatile double HOCKEYSTICK_INITIAL = 1.0;
     public static volatile double HOCKEYSTICK_OUT = 0.4;
     public static volatile double HOCKEYSTICK_PARK = 0.74;
     // MOTORS
@@ -62,7 +62,7 @@ public final class Constants {
     public static volatile double TIME_PICKPUP_BLOCK = 0.75;
     public static volatile double TIME_CLOSE_CLAW = 0.75;
     public static volatile double TIME_PRE_TRANSFER = 0.75;
-    public static volatile double TIME_DUMP_BUCKET = 1.0;
+    public static volatile double TIME_DUMP_BUCKET = 0.75;
     public static volatile double TIME_HOCKEY_STICK = 1;
     public static volatile double TIME_TRANSFER_BLOCK = 0.5;
 

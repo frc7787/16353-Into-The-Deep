@@ -49,135 +49,72 @@ public class AutoBlocksOnlyAll4 extends LinearOpMode {
         clawServo.setPosition(CLAW_OPEN);
         bucketServo.setPosition(BUCKET_HOME);
 
-        //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
-        //.setPose(initialPose)
-        //.build();
-
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // starting pre-loaded to sub
+                // BUCKET 1
+                // takes pre-loaded sample to dump in bucket
+
                 .setReversed(true)
-                //hang specimen onto bar
-                //.splineToConstantHeading(new Vector2d(-4,-33.5),Math.PI/2)
                 .splineToConstantHeading(new Vector2d(-47,-65), Math.PI);
                 //.waitSeconds(1);
-
-        // bar to wall pickup
 
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 // FIRST SPIKE MARK, head towards
 
-                //.splineToLinearHeading(new Pose2d(-24,-48,Math.PI),Math.PI)
-                //.splineToSplineHeading(new Pose2d( -48,-45,Math.PI/2),Math.PI/2);
                 .setTangent(Math.PI/2)
                 .strafeTo(new Vector2d(-47,-60))
                 .splineToSplineHeading(new Pose2d( -48,-45,Math.PI/2),Math.PI/2);
 
 
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-
                 //strafe hockey stick into sample, then pick up sample
-                .strafeTo(new Vector2d(-55,-45))
-                //.strafeTo(new Vector2d(-50,-45))
-                .strafeTo(new Vector2d(-50,-43));
-        //.waitSeconds(0.5);
 
+                .strafeTo(new Vector2d(-55,-45))
+                .strafeTo(new Vector2d(-50,-43));
+                //.waitSeconds(0.5);
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // Bucket 1
+                // Bucket 2
 
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
-        //.waitSeconds(0.5);
+                //.waitSeconds(0.5);
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // Spike Mark 2
-                /*
-                .splineToSplineHeading(new Pose2d(-60,-42,Math.PI/2),Math.PI/2)
-                .strafeTo(new Vector2d(-62,-42))
-                .strafeTo(new Vector2d(-62,-40));
-                 */
+
                 .splineToSplineHeading(new Pose2d(-53,-45,Math.PI/2),Math.PI/2)
                 .strafeTo(new Vector2d(-63.5,-45)) // changed from -64, to stop hitting wall
                 .strafeTo(new Vector2d(-59,-43));
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
-                // Bucket 2
+                // Bucket 3
+
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
 
         TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
-                // park in sub
-                //.setTangent(Math.PI/2)
-                //.splineTo(new Vector2d(-10, -8), 0);
-                //.splineToLinearHeading(new Pose2d(-10,-8,Math.PI),0);
+                // Spike Mark 3
+
                 .setTangent(Math.PI/4)
                 .splineToLinearHeading(new Pose2d(-57.5,-40.0,3*Math.PI/4),3*Math.PI/4);
                 // changed from -57,-39.5 to
 
         TrajectoryActionBuilder eighthBuilder = seventhBuilder.endTrajectory().fresh()
-                // Bucket 2
+                // Bucket 4
+
                 .setTangent(-Math.PI/4)
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
 
         TrajectoryActionBuilder ninthBuilder = eighthBuilder.endTrajectory().fresh()
                 // park in sub
-                //.setTangent(Math.PI/2)
-                //.splineTo(new Vector2d(-10, -8), 0);
+
                 .setTangent(Math.PI/2)
                 .splineToLinearHeading(new Pose2d(-20,-9,0),0);
 
-
-
-
-
-
-
-        // bar to wall pickup
-
-
-/*  SKIP THE THIRD SPIKE MARK - IT TAKES TOO LONG
-        TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // THIRD SPIKE MARK
-                // heading back up to third spike mark
-                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
-                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
-                // almost there
-                .splineToConstantHeading(new Vector2d(64,-21),0)
-                // push block into zone
-                .splineToLinearHeading(new Pose2d(56,-61,Math.PI/2),-Math.PI/2)
-                .splineToLinearHeading(new Pose2d(50,-60,Math.PI/2),-Math.PI/2);
-
-            TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
-                // from pickup specimen to clipping
-        ;
- */
-
-
-
-
-
-
-
-                //TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
-                // extra one just in case you want to add something
-
-        // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
-        // north a bit, turn around again (tangents will now be NEGATIVE again)
-        // west towards sub, north to sub, action: clipping, reverse to park if possible
-
-/*
-        TrajectoryActionBuilder extraBuilder = firstBuilder.endTrajectory().fresh()
-                .waitSeconds(5)
-                .lineToY(-48)
-                .waitSeconds(3)
-                .setTangent(0)
-                .lineToX(0);
-
- */
 
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
@@ -204,7 +141,8 @@ public class AutoBlocksOnlyAll4 extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        // to the bucket
+                        // to the bucket with the preloaded
+                        // bucket deposit 1
                         new ParallelAction(
                                 first, elevator.BucketPosition()
                         ),
@@ -213,11 +151,10 @@ public class AutoBlocksOnlyAll4 extends LinearOpMode {
                         new ParallelAction(elevator.ClipHome(),elevator.HockeyStickOut(),
                                 new SequentialAction(second, third)),
                         // towards spike mark 1
-                        //new ParallelAction(
-                        //        third   // strafe into block, then pickup
-                        //),
+                        // strafe into block, then pickup
+
                         elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
-                        // bucket deposit 1
+                        // bucket deposit 2
                         new ParallelAction(
                                 fourth,elevator.BucketPosition()
                         ),
@@ -228,47 +165,27 @@ public class AutoBlocksOnlyAll4 extends LinearOpMode {
                                         elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
 
                         ),
-                        // bucket deposit 2
+                        // bucket deposit 3
                         new ParallelAction(
                                 sixth, elevator.BucketPosition()
                         ),
                         elevator.DumpBucket(),
-                        // park
-                        //new ParallelAction(seventh,
-                        //        elevator.ClipIt(),elevator.HockeyStickIn(),elevator.PreTransferBlock()),
-                        //elevator.ClipPark()
+                        // spike mark 3
                         new ParallelAction(elevator.ClipHome(),elevator.HockeyStickIn(),
                                 new SequentialAction(seventh,
                                         elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
                         ),
+                        // bucket deposit 4
                         new ParallelAction(elevator.BucketPosition(),eighth),
                         elevator.DumpBucket(),
                         new ParallelAction(elevator.ClipHome(),ninth,elevator.HockeyStickPark())
 
 
                 ) // end of Sequential Action
-        );
-        //Actions.runBlocking(second);
+        );  // end of Actions.runblocking
 
-        //Actions.runBlocking(barToObservationZone);
-
-        //Actions.runBlocking(sample2ToObservationZone);
-
-        //Actions.runBlocking(observationZoneToBar);
-
-        //path to return to ob zone for second specimen
-        //Actions.runBlocking(backToObservationZone);
-
-        //insert going to wall pickup pos
-        //Actions.runBlocking(pickupSecondSpecimen);
-
-        //insert lifting specimen off wall
-        //Actions.runBlocking(toBarSecondSpecimen);
-
-        //insert placing specimen on high bar
-        //Actions.runBlocking(bookItToObservationZone);
-    }
-}
+    } // end of runopmode
+} // end of public class
 
 
 

@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 @Autonomous
-public class AutoBlocksSundayFeb16 extends LinearOpMode {
-    private final Pose2d initialPose = new Pose2d(-18.0, -64, -Math.PI / 2);
+public class AutoBlocks3 extends LinearOpMode {
+    private final Pose2d initialPose = new Pose2d(-40.0, -66.5, 0); // changed y from -65
 
 
     private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
@@ -49,108 +49,76 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         clawServo.setPosition(CLAW_OPEN);
         bucketServo.setPosition(BUCKET_HOME);
 
-        //MecanumDrive drive = new MecanumDrive.Builder(hardwareMap)
-        //.setPose(initialPose)
-        //.build();
-
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         ElevatorAction elevator = new ElevatorAction(hardwareMap);
 
         TrajectoryActionBuilder firstBuilder = drive.actionBuilder(initialPose)
-                // starting pre-loaded to sub
-                .setReversed(true)
-                //hang specimen onto bar
-                .splineToConstantHeading(new Vector2d(-4,-33.5),Math.PI/2)
-                .waitSeconds(0.5);
+                // BUCKET 1
+                // takes pre-loaded sample to dump in bucket
 
-        // bar to wall pickup
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(-47,-65), Math.PI);
+        //.waitSeconds(1);
 
 
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 // FIRST SPIKE MARK, head towards
 
-                .splineToLinearHeading(new Pose2d(-24,-48,Math.PI),Math.PI)
+                .setTangent(Math.PI/2)
+                .strafeTo(new Vector2d(-47,-60))
                 .splineToSplineHeading(new Pose2d( -48,-45,Math.PI/2),Math.PI/2);
 
+
         TrajectoryActionBuilder thirdBuilder = secondBuilder.endTrajectory().fresh()
-
                 //strafe hockey stick into sample, then pick up sample
-                .strafeTo(new Vector2d(-55,-45))
-                //.strafeTo(new Vector2d(-50,-45))
-                .strafeTo(new Vector2d(-50,-43));
-                //.waitSeconds(0.5);
 
+                .strafeTo(new Vector2d(-55,-45))
+                .strafeTo(new Vector2d(-50,-43));
+        //.waitSeconds(0.5);
 
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // Bucket 1
+                // Bucket 2
 
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
-                //.waitSeconds(0.5);
+        //.waitSeconds(0.5);
 
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
                 // Spike Mark 2
-                /*
-                .splineToSplineHeading(new Pose2d(-60,-42,Math.PI/2),Math.PI/2)
-                .strafeTo(new Vector2d(-62,-42))
-                .strafeTo(new Vector2d(-62,-40));
-                 */
+
                 .splineToSplineHeading(new Pose2d(-53,-45,Math.PI/2),Math.PI/2)
-                .strafeTo(new Vector2d(-65,-45))
-                .strafeTo(new Vector2d(-60,-43));
+                .strafeTo(new Vector2d(-63.5,-45)) // changed from -64, to stop hitting wall
+                .strafeTo(new Vector2d(-59,-43));
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
-                // Bucket 2
+                // Bucket 3
+
                 .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
 
+        // FOR 3 BLOCKS ONLY, take out movement to the 3rd SPIKE MARK
+        /*
         TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
+                // Spike Mark 3
+
+                .setTangent(Math.PI/4)
+                .splineToLinearHeading(new Pose2d(-57.5,-40.0,3*Math.PI/4),3*Math.PI/4);
+        // changed from -57,-39.5 to
+
+        TrajectoryActionBuilder eighthBuilder = seventhBuilder.endTrajectory().fresh()
+                // Bucket 4
+
+                .setTangent(-Math.PI/4)
+                .splineToLinearHeading(new Pose2d(-56,-56,Math.PI/4),Math.PI*8/6);
+
+         */
+
+        TrajectoryActionBuilder ninthBuilder = sixthBuilder.endTrajectory().fresh()
                 // park in sub
-                //.setTangent(Math.PI/2)
-                //.splineTo(new Vector2d(-10, -8), 0);
-                .splineToLinearHeading(new Pose2d(-10,-8,Math.PI),0)
 
+                .setTangent(Math.PI/2)
+                .splineToLinearHeading(new Pose2d(-20,-9,0),0);
 
-        // bar to wall pickup
-
-
-/*  SKIP THE THIRD SPIKE MARK - IT TAKES TOO LONG
-        TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
-                // THIRD SPIKE MARK
-                // heading back up to third spike mark
-                .splineToLinearHeading(new Pose2d(36,-53,Math.PI/2),Math.PI/2)
-                .splineToSplineHeading(new Pose2d(36,-33,Math.PI/2), Math.PI/2)
-                // almost there
-                .splineToConstantHeading(new Vector2d(64,-21),0)
-                // push block into zone
-                .splineToLinearHeading(new Pose2d(56,-61,Math.PI/2),-Math.PI/2)
-                .splineToLinearHeading(new Pose2d(50,-60,Math.PI/2),-Math.PI/2);
-
-            TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
-                // from pickup specimen to clipping
-        ;
- */
-
-
-
-
-
-
-
-        //TrajectoryActionBuilder sixthBuilder = secondBuilder.endTrajectory().fresh()
-        // extra one just in case you want to add something
-        ;
-        // new trajectory needed: first, action: elevator up to clipping position, lifts specimen from wall
-        // north a bit, turn around again (tangents will now be NEGATIVE again)
-        // west towards sub, north to sub, action: clipping, reverse to park if possible
-
-
-        TrajectoryActionBuilder extraBuilder = firstBuilder.endTrajectory().fresh()
-                .waitSeconds(5)
-                .lineToY(-48)
-                .waitSeconds(3)
-                .setTangent(0)
-                .lineToX(0);
 
         Action first = firstBuilder.build();
         Action second = secondBuilder.build();
@@ -158,7 +126,9 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
         Action fourth = fourthBuilder.build();
         Action fifth = fifthBuilder.build();
         Action sixth = sixthBuilder.build();
-        Action seventh = seventhBuilder.build();
+        //Action seventh = seventhBuilder.build();
+        //Action eighth = eighthBuilder.build();
+        Action ninth = ninthBuilder.build();
 
 
 
@@ -175,63 +145,55 @@ public class AutoBlocksSundayFeb16 extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        // to the sub then clipping
-                        new ParallelAction(
-                                first, elevator.ClippingPosition()
-                        ),
-                        // clip it
-                        elevator.ClipIt(),
-                        new ParallelAction(second),
-                        // towards spike mark 1
-                        new ParallelAction(elevator.ClipHome(),
-                                third, elevator.HockeyStickOut()    // strafe into block, then pickup
-                        ),
-                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
+                        // to the bucket with the preloaded
                         // bucket deposit 1
+                        new ParallelAction(
+                                first, elevator.BucketPosition()
+                        ),
+                        // dump the preloaded
+                        elevator.DumpBucket(),
+                        new ParallelAction(elevator.ClipHome(),elevator.HockeyStickOut(),
+                                new SequentialAction(second, third)),
+                        // towards spike mark 1
+                        // strafe into block, then pickup
+
+                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
+                        // bucket deposit 2
                         new ParallelAction(
                                 fourth,elevator.BucketPosition()
                         ),
                         elevator.DumpBucket(),
                         // towards spike mark 2
-                        new ParallelAction(
-                                fifth,elevator.ClipHome()
+                        new ParallelAction(elevator.ClipHome(),
+                                new SequentialAction(fifth,
+                                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
+
                         ),
-                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock(),
-                        // bucket deposit 2
+                        // bucket deposit 3
                         new ParallelAction(
                                 sixth, elevator.BucketPosition()
                         ),
                         elevator.DumpBucket(),
-                        // park
-                        new ParallelAction(seventh,
-                                elevator.ClipIt(),elevator.HockeyStickIn(),elevator.PreTransferBlock()),
-                        elevator.ClipPark()
 
+                        /*  FOR 3 BLOCKS ONLY, take out movement to the 3rd SPIKE MARK
+                        // spike mark 3
+                        new ParallelAction(elevator.ClipHome(),elevator.HockeyStickIn(),
+                                new SequentialAction(seventh,
+                                        elevator.PickupBlock(),elevator.PreTransferBlock(),elevator.TransferBlock())
+                        ),
+                        // bucket deposit 4
+                        new ParallelAction(elevator.BucketPosition(),eighth),
+                        elevator.DumpBucket(),
+                         */
+                        new ParallelAction(elevator.ClipHome(),ninth,elevator.HockeyStickPark())
 
 
                 ) // end of Sequential Action
-        );
-        //Actions.runBlocking(second);
+        );  // end of Actions.runblocking
 
-        //Actions.runBlocking(barToObservationZone);
+    } // end of runopmode
+} // end of public class
 
-        //Actions.runBlocking(sample2ToObservationZone);
-
-        //Actions.runBlocking(observationZoneToBar);
-
-        //path to return to ob zone for second specimen
-        //Actions.runBlocking(backToObservationZone);
-
-        //insert going to wall pickup pos
-        //Actions.runBlocking(pickupSecondSpecimen);
-
-        //insert lifting specimen off wall
-        //Actions.runBlocking(toBarSecondSpecimen);
-
-        //insert placing specimen on high bar
-        //Actions.runBlocking(bookItToObservationZone);
-    }
-}
 
 
 

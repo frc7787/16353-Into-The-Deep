@@ -89,7 +89,7 @@ public class AutoClip2PreLoaded extends LinearOpMode {
                 // go towards lh spike mark
                 .splineToSplineHeading(new Pose2d(37,-33,Math.PI/2), Math.PI/2)
                 // almost there
-                .splineToConstantHeading(new Vector2d(45,-21),0)
+                .splineToConstantHeading(new Vector2d(44,-21),0)    // changed x from 45
                 // push block into zone
                 .splineToSplineHeading(new Pose2d(48,-61,Math.PI/2),-Math.PI/2);
 

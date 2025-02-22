@@ -71,12 +71,12 @@ public class AutoHang2plus1 extends LinearOpMode {
         TrajectoryActionBuilder secondBuilder = firstBuilder.endTrajectory().fresh()
                 // FIRST SPIKE MARK
                 // heading towards first spike marks, go midway
-                // need to extend hockey stick
+
                 .splineToLinearHeading(new Pose2d(24,-45,0),0)
                 // go towards lh spike mark
                 .splineToSplineHeading(new Pose2d(37,-33,Math.PI/2), Math.PI/2)
                 // almost there
-                .splineToConstantHeading(new Vector2d(45,-21),0)
+                .splineToConstantHeading(new Vector2d(43,-21),0)
                 // push block into zone
                 .splineToSplineHeading(new Pose2d(48,-61,Math.PI/2),-Math.PI/2);
 
@@ -95,7 +95,7 @@ public class AutoHang2plus1 extends LinearOpMode {
                 // ADD in the movement away from the wall to prepare for specimen pickup
                 .splineToLinearHeading(new Pose2d(50,-62,Math.PI/2),Math.PI)
                 .waitSeconds(1.5)
-                .strafeTo(new Vector2d(50,-67));
+                .strafeTo(new Vector2d(50,-67.5));
 
         TrajectoryActionBuilder fourthBuilder = thirdBuilder.endTrajectory().fresh()
                 // at the wall, picked up the plus 1 specimen, head to the bar to clip
@@ -109,12 +109,12 @@ public class AutoHang2plus1 extends LinearOpMode {
                 .waitSeconds(1)
                 //.setTangent(Math.PI/2)
                 //.lineToY(-64, null, new ProfileAccelConstraint(-70.0, 70.0));
-                .strafeTo(new Vector2d(50,-66.5), null, null); // BACK ONE MORE
+                .strafeTo(new Vector2d(50,-67), null, null); // BACK ONE MORE
 
         TrajectoryActionBuilder sixthBuilder = fifthBuilder.endTrajectory().fresh()
                 // from the wall, back to the sub
                 .setTangent(Math.PI / 2)
-                .splineToSplineHeading(new Pose2d(-0.5, -32.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
+                .splineToSplineHeading(new Pose2d(1.0, -31.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
                 .waitSeconds(0.5);
 
         TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
@@ -192,11 +192,11 @@ public class AutoHang2plus1 extends LinearOpMode {
                         // clip it
                         elevator.ClipIt(),
                         // push second block
-                        new ParallelAction(
-                                elevator.ClipHome(), second
-                        ),
+                        second,
                         // push third block and pickup
-                        third,
+                        new ParallelAction(
+                                elevator.ClipHome(),third
+                        ),
                         // to the sub then clipping plus 1
                         new ParallelAction(
                                 elevator.ClippingPosition(), fourth

@@ -61,7 +61,14 @@ public class MeepMeepBlocksOnly {
 
                 // Spike Mark 3!
                         .setTangent(Math.PI/4)
-                .splineToLinearHeading(new Pose2d(-55.9,-39,3*Math.PI/4),3*Math.PI/4)
+                //.splineToLinearHeading(new Pose2d(-58.5,-40,3*Math.PI/4),3*Math.PI/4)
+                .splineToLinearHeading(new Pose2d(-59.5,-40,Math.toRadians(130)),Math.toRadians(135))
+                // PoseX -59.5
+                // PoseY -40,
+                // PoseHeading 130 degrees
+                // PoseTangent 135
+
+
 
                 .build());
 

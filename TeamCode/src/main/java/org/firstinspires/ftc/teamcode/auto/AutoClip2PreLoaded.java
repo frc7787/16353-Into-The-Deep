@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.actions.ElevatorAction;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
+@Disabled
 @Autonomous
 public class AutoClip2PreLoaded extends LinearOpMode {
     private final Pose2d initialPose = new Pose2d(18.0, -64, -Math.PI / 2);
@@ -107,7 +109,7 @@ public class AutoClip2PreLoaded extends LinearOpMode {
 
                 // ADD in the movement away from the wall to prepare for specimen pickup
                 .splineToLinearHeading(new Pose2d(50,-62,Math.PI/2),Math.PI)
-                .waitSeconds(1.5)
+                .waitSeconds(1.0)
                 .strafeTo(new Vector2d(50,-67));
 
 
@@ -116,6 +118,11 @@ public class AutoClip2PreLoaded extends LinearOpMode {
                 // at the wall, picked up the plus 1 specimen, head to the bar to clip
                 .splineToSplineHeading(new Pose2d(6, -31.0, -Math.PI /1.999), Math.PI / 2, null, null)
                 .waitSeconds(0.5);
+
+        TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
+                // try to PARK
+                .setTangent(-Math.PI/2)
+                .strafeTo(new Vector2d(40,-60));
 
 /* // COMMENTED OUT
         TrajectoryActionBuilder fifthBuilder = fourthBuilder.endTrajectory().fresh()
@@ -133,10 +140,7 @@ public class AutoClip2PreLoaded extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(-0.5, -32.0, -Math.PI / 2), Math.PI / 2,fastVelocity,fastAcceleration)
                 .waitSeconds(0.5);
 
-        TrajectoryActionBuilder seventhBuilder = sixthBuilder.endTrajectory().fresh()
-                // try to PARK
-                .setTangent(-Math.PI/2)
-                .strafeTo(new Vector2d(40,-60));
+
 
 
  */ // END OF COMMENTED OUT
@@ -187,7 +191,7 @@ public class AutoClip2PreLoaded extends LinearOpMode {
         Action fourth = fourthBuilder.build();
         Action fifth = fifthBuilder.build();
         Action sixth = sixthBuilder.build();
-        //Action seventh = seventhBuilder.build();
+        Action seventh = seventhBuilder.build();
 
 
 
@@ -218,18 +222,18 @@ public class AutoClip2PreLoaded extends LinearOpMode {
                         // clip it
                         elevator.ClipIt(),
                         // push the first spike mark
-                        new ParallelAction(
-                                elevator.ClipHome(), fourth
-                        ),
+                        fourth,
                         // SECOND SPIKE MARK - push AND pickup plus 1
                         new ParallelAction(
-                                fifth
+                                fifth, elevator.ClipHome()
                         ),
                         // back to the sub then clipping first spike mark
                         new ParallelAction(
                                 elevator.ClippingPosition(),sixth
                         ),
-                        elevator.ClipIt()
+                        elevator.ClipIt(),
+                        seventh,
+                        elevator.ClipHome()
 
 
                         // push fourth block

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 
+@Disabled
 @Autonomous
 public class AutoTestSplineTo1 extends LinearOpMode {
     private final Pose2d initialPose = new Pose2d(7.5, -61, -Math.PI / 2);

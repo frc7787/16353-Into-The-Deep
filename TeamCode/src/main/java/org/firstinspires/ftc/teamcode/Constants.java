@@ -66,6 +66,16 @@ public final class Constants {
     public static volatile double TIME_HOCKEY_STICK = 1;
     public static volatile double TIME_TRANSFER_BLOCK = 0.5;
 
+    // PoseX -59.5
+    // PoseY -40,
+    // PoseHeading 130 degrees
+    // PoseTangent 135
+
+    public static volatile double POSE_X = -58.5;
+    public static volatile double POSE_Y = -40;
+    public static volatile double POSE_HEADING = 130;
+    public static volatile double POSE_TANGENT = 135;
+
 
 
     // ------------------------------------------------------------------------

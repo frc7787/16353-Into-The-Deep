@@ -100,7 +100,8 @@ public class AutoBlocksOnlyAll4 extends LinearOpMode {
                 // Spike Mark 3
 
                 .setTangent(Math.PI/4)
-                .splineToLinearHeading(new Pose2d(-57.5,-40.0,3*Math.PI/4),3*Math.PI/4);
+                //.splineToLinearHeading(new Pose2d(-58.5,-40.0,3*Math.PI/4),3*Math.PI/4);
+                .splineToLinearHeading(new Pose2d(POSE_X,POSE_Y,Math.toRadians(POSE_HEADING)),Math.toRadians(POSE_TANGENT));
                 // changed from -57,-39.5 to
 
         TrajectoryActionBuilder eighthBuilder = seventhBuilder.endTrajectory().fresh()

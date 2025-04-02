@@ -101,10 +101,10 @@ public class amainCode extends OpMode {
         clipMotor = hardwareMap.dcMotor.get(CLIP_MOTOR_NAME);
         clipMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        clawServo = hardwareMap.get(Servo.class,CLAW_SERVO_NAME);
-        rotationServo = hardwareMap.get(Servo.class,ROTATION_SERVO_NAME);
+       // clawServo = hardwareMap.get(Servo.class,CLAW_SERVO_NAME);
+        //rotationServo = hardwareMap.get(Servo.class,ROTATION_SERVO_NAME);
         bucketServo = hardwareMap.get(Servo.class,BUCKET_SERVO_NAME);
-        twistServo = hardwareMap.get(Servo.class,TWIST_SERVO_NAME);
+        //twistServo = hardwareMap.get(Servo.class,TWIST_SERVO_NAME);
         hockeyStickServo = hardwareMap.get(Servo.class, HOCKEYSTICK_SERVO_NAME);
 
 
@@ -132,6 +132,12 @@ public class amainCode extends OpMode {
         extentionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         extentionMotor.setDirection(DcMotor.Direction.REVERSE);
 
+        //i added this for the rotation
+        rotationMotor = hardwareMap.dcMotor.get("rotationMotor");
+        rotationMotor.setDirection(DcMotor.Direction.FORWARD);
+        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            
+        
         HOMING = true; // set this TRUE at the beginning, so that the HOMING routine will run until clip and extension have both homed
         HOMINGINITCLIP = true; // set this TRUE at the beginning, so that the clip motor will home before anything else
         HOMINGINITEXTENSION = true; // set this TRUE at the beginning, so that the extension motor will home before anything else
@@ -148,9 +154,9 @@ public class amainCode extends OpMode {
         elapsedTime.reset();
         //rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
         hockeyStickServo.setPosition(HOCKEYSTICKINITIAL);
-        rotationServo.setPosition(ROTATIONNEUTRAL);
-        clawServo.setPosition(CLAWOPEN);
-        twistServo.setPosition(TWISTPICKUP);
+        //rotationServo.setPosition(ROTATIONNEUTRAL);
+       // clawServo.setPosition(CLAWOPEN);
+       // twistServo.setPosition(TWISTPICKUP);
         bucketServo.setPosition(BUCKETHOME);
 
     }
@@ -226,57 +232,57 @@ public class amainCode extends OpMode {
             }
 
             // bumpers for sample PICKUP
-            if (gamepad2.right_bumper){
+           /* if (gamepad2.right_bumper){
                 clawServo.setPosition(CLAWPICKUP);
             } else if (gamepad2.left_bumper) {
                 clawServo.setPosition(CLAWOPEN);
             }
-
+*/
             // dpad for claw ROTATION
-            if (gamepad2.dpad_up) { // pickup
+          /*  if (gamepad2.dpad_up) { // pickup
                 rotationServo.setPosition(ROTATIONPICKUP);
                 twistServo.setPosition(TWISTPICKUP);
                 bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
-
+*/
 
             }
-            else if (gamepad2.dpad_down) {  // pre-pickup
+    /*        else if (gamepad2.dpad_down) {  // pre-pickup
                 rotationServo.setPosition(ROTATIONPRE);
                 twistServo.setPosition(TWISTPICKUP);
                 bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+*/
 
-
-            }
+        /*    }
             else if (gamepad2.dpad_left) {  // neutral
                 rotationServo.setPosition(ROTATIONNEUTRAL);
                 twistServo.setPosition(TWISTPICKUP);
-                bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
+              */  bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
 
-            }
+        /*    }
             else if (gamepad2.dpad_right ) { // transfer
                 bucketServo.setPosition(BUCKETHOME);//TO HOME BUCKET
                 rotationServo.setPosition(ROTATIONTRANSFER);
                 twistServo.setPosition(TWISTTRANSFER);
             }
-
-        } // end of not HOMING for extention
+*/
+     //   } // end of not HOMING for extention
 
         // right hand geometric buttons for clip elevator
-        if (gamepad2.triangle) { // bucket
+       // if (gamepad2.triangle) { // bucket
 
-        } else if (gamepad2.square) { // prebucket USED TO BE PREBUCKET NOW IT IS BUCKET
+        }/* else if (gamepad2.square) { // prebucket USED TO BE PREBUCKET NOW IT IS BUCKET
             clipMotor.setTargetPosition(CLIPMOTORPREBUCKET);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWERUP);
             rotationServo.setPosition(ROTATIONNEUTRAL);
             twistServo.setPosition(TWISTPICKUP);
-            telemetry.addData("Elevator going to","prebucket");
-        } else if (gamepad2.circle) { // bar
+            telemetry.addData("Elevator going to","prebucket"); 
+        } */ else if (gamepad2.circle) { // bar
             clipMotor.setTargetPosition(CLIPMOTORBAR);
             clipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             clipMotor.setPower(CLIPMOTORPOWER);
-            rotationServo.setPosition(ROTATIONNEUTRAL);
-            twistServo.setPosition(TWISTPICKUP);
+           // rotationServo.setPosition(ROTATIONNEUTRAL);
+           // twistServo.setPosition(TWISTPICKUP);
 
             telemetry.addData("Elevator going to","bar");
         } else if (gamepad2.cross) { // home
@@ -307,6 +313,12 @@ public class amainCode extends OpMode {
             //HOMING = true;
             //HOMINGINITCLIP = true;
             //elapsedTime.reset();
+        } else if (gamepad1.dpad_up){
+            rotationMotor.setPower(0.9);
+
+        } else if (gamepad1.dpad_down){
+            rotationMotor.setPower(0.3);
+
         }
 
         int elevatorPosition = clipMotor.getCurrentPosition();

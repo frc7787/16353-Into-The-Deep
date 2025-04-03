@@ -319,7 +319,13 @@ public class amainCode extends OpMode {
         } else if (gamepad1.dpad_down){
             rotationMotor.setPower(0.3);
 
-        }
+        } else {
+            rotationMotor.setPower(0);
+    
+    
+
+
+}
 
         int elevatorPosition = clipMotor.getCurrentPosition();
         telemetry.addData("Elevator Encoder Position:", elevatorPosition);

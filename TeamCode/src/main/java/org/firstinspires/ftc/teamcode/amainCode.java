@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class amainCode extends OpMode {
 
     private RevTouchSensor limitSwitch, clipTouchSensor, limitMaxExtension;
-    private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor;
+    private DcMotor frontLeft, frontRight, backRight, backLeft,clipMotor,extentionMotor, intakeMotor;
     private Servo rotationServo, clawServo,twistServo, bucketServo, hockeyStickServo;
    //old servos not in use anymore extentionLeft,extentionRight
    private double BUCKETHOME = 0.8;

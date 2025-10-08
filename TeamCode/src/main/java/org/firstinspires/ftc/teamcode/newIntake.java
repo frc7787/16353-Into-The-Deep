@@ -309,7 +309,7 @@ public class newIntake extends OpMode {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
-
+        telemetry.addData("intakeMotor",intakeMotor.getCurrentPosition());
         telemetry.update();
 
 
